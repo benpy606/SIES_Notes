@@ -18,7 +18,7 @@ type PostWithRelations = {
   subject_id?: string
   title?: string
   image_url?: string | null
-  image_urls?: string[] | null
+  image_urls?: string[] | string | null
   pdf_url?: string | null
   file_type?: string
   caption?: string
@@ -109,14 +109,29 @@ export default function PostCardComponent({
 
   const effectivePdfUrl = post.pdf_url || (isPdfFile ? post.image_url : null)
   
-  // Extract all valid image URLs
-  const allImageUrls: string[] = isPdfFile
-    ? []
-    : Array.isArray(post.image_urls) && post.image_urls.length > 0
-    ? post.image_urls
-    : post.image_url
-    ? [post.image_url]
-    : []
+  // Extract all valid image URLs (handling array, comma-separated string, or single URL)
+  let rawImagesList: string[] = []
+  if (!isPdfFile) {
+    if (Array.isArray(post.image_urls) && post.image_urls.length > 0) {
+      rawImagesList = post.image_urls
+    } else if (typeof post.image_urls === 'string' && post.image_urls.trim().length > 0) {
+      try {
+        if (post.image_urls.startsWith('[')) {
+          rawImagesList = JSON.parse(post.image_urls)
+        } else {
+          rawImagesList = post.image_urls.split(',').map((s) => s.trim())
+        }
+      } catch {
+        rawImagesList = [post.image_urls]
+      }
+    } else if (post.image_url && post.image_url.trim().length > 0) {
+      rawImagesList = post.image_url.includes(',')
+        ? post.image_url.split(',').map((s) => s.trim())
+        : [post.image_url]
+    }
+  }
+
+  const allImageUrls = rawImagesList.filter((url) => typeof url === 'string' && url.length > 0)
 
   const authorProfile = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles
 
@@ -140,12 +155,12 @@ export default function PostCardComponent({
   }
 
   return (
-    <article className="paper-card overflow-hidden flex flex-col group transition-all animate-slide-up">
+    <article className="paper-card bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col group transition-all animate-slide-up shadow-md">
       {/* Card Header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <span
-            className="w-3.5 h-3.5 rounded-full ring-2 ring-white shadow-xs shrink-0"
+            className="w-3.5 h-3.5 rounded-full ring-2 ring-slate-200 dark:ring-white/30 shadow-xs shrink-0"
             style={{ backgroundColor: subjectColor }}
           />
           <span
@@ -153,14 +168,14 @@ export default function PostCardComponent({
             style={{
               color: subjectColor,
               borderColor: `${subjectColor}50`,
-              backgroundColor: `${subjectColor}20`,
+              backgroundColor: `${subjectColor}15`,
             }}
           >
             {subjectName}
           </span>
           <span
             suppressHydrationWarning
-            className="text-[11px] text-slate-600 dark:text-slate-300 font-bold flex items-center gap-1"
+            className="text-[11px] text-slate-500 dark:text-slate-300 font-bold flex items-center gap-1"
           >
             <Calendar size={12} className="text-amber-500 dark:text-amber-400" />
             {formattedDate}
@@ -172,7 +187,7 @@ export default function PostCardComponent({
             <button
               onClick={() => setShowMenu(!showMenu)}
               aria-label="Options"
-              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
             >
               <MoreHorizontal size={18} />
             </button>
@@ -204,7 +219,7 @@ export default function PostCardComponent({
 
       {/* Touch Swipeable Multi-Image Media Carousel */}
       {allImageUrls.length > 0 && (
-        <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/img">
+        <div className="w-full bg-slate-100 dark:bg-slate-950 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/img">
           {/* Top Multi-Page Badge Overlay */}
           {allImageUrls.length > 1 && (
             <div className="absolute top-3 right-3 z-20 bg-slate-950/85 backdrop-blur-md text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-slate-700/80 shadow-lg flex items-center gap-1.5 font-mono-paper pointer-events-none">
@@ -295,7 +310,7 @@ export default function PostCardComponent({
         </div>
       )}
 
-      {/* PDF Visual Preview (Picture-like container) */}
+      {/* PDF Visual Preview */}
       {effectivePdfUrl && (
         <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/pdf">
           <div
@@ -382,7 +397,7 @@ export default function PostCardComponent({
           className={`min-h-[38px] px-3.5 rounded-full flex items-center gap-1.5 text-xs font-black transition-all hover-bounce ${
             hasUpvoted
               ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-300 animate-heart-pulse'
-              : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 shadow-xs'
+              : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 shadow-xs'
           }`}
         >
           <Heart size={15} className={hasUpvoted ? 'fill-white text-white' : 'text-slate-400 stroke-[2.2]'} />
