@@ -1,0 +1,14 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e3]:
+      - heading "CS_CLASS_2026" [level=1] [ref=e4]
+      - paragraph [ref=e5]: Classroom Notes
+      - generic [ref=e6]:
+        - generic [ref=e7]: Title
+        - textbox "Lecture 1 — Intro to CS" [ref=e8]
+        - generic [ref=e9]: Notes
+        - textbox "Key points, definitions, code snippets..." [ref=e10]
+        - button "Save Note" [ref=e11]
+      - paragraph [ref=e13]: Loading notes...
+  - button "Open Next.js Dev Tools" [ref=e19] [cursor=pointer]:
+    - img [ref=e20]

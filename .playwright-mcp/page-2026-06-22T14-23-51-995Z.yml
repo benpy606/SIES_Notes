@@ -1,0 +1,6 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - heading "Classroom Notes" [level=1] [ref=e3]
+    - paragraph [ref=e4]: "Failed to load notes: Could not find the table 'public.todos' in the schema cache"
+  - button "Open Next.js Dev Tools" [ref=e10] [cursor=pointer]:
+    - img [ref=e11]

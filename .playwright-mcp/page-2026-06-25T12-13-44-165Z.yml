@@ -1,0 +1,13 @@
+- generic [ref=e3]:
+  - heading "INK_26" [level=1] [ref=e6]
+  - heading "Welcome back" [level=2] [ref=e7]
+  - paragraph [ref=e8]: Sign in to browse and upload notes
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]: Email
+      - textbox "you@example.com" [ref=e12]
+    - generic [ref=e13]:
+      - generic [ref=e14]: Password
+      - textbox "••••••••" [ref=e15]
+    - button "Sign in" [ref=e16]
+  - button "Don't have an account? Sign up" [ref=e18]

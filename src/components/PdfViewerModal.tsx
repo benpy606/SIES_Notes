@@ -1,0 +1,124 @@
+'use client'
+
+import { useState } from 'react'
+import { X, ExternalLink, Download, FileText, Layers, RefreshCw } from 'lucide-react'
+
+export default function PdfViewerModal({
+  url,
+  title,
+  onClose,
+}: {
+  url: string | null
+  title?: string
+  onClose: () => void
+}) {
+  const [viewEngine, setViewEngine] = useState<'google' | 'direct'>('google')
+  const [isReady, setIsReady] = useState(false)
+
+  if (!url) return null
+
+  const encodedUrl = encodeURIComponent(url)
+  const googleViewerUrl = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`
+  const currentSrc = viewEngine === 'google' ? googleViewerUrl : url
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col p-2 sm:p-6 animate-fade-in">
+      {/* Modal Toolbar Header */}
+      <div className="w-full max-w-5xl mx-auto flex flex-wrap items-center justify-between bg-slate-950 text-slate-100 px-4 py-3.5 rounded-t-3xl border-b border-slate-800 gap-3 shadow-2xl">
+        {/* Title */}
+        <div className="flex items-center gap-3 min-w-0 pr-2">
+          <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+            <FileText size={20} className="stroke-[2.5]" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="font-display font-black text-xs sm:text-sm text-slate-50 truncate">
+              {title || 'PDF Note Document'}
+            </span>
+            <span className="text-[10px] font-mono-paper uppercase tracking-wider text-amber-400 font-bold">
+              PDF Interactive Reader
+            </span>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Engine Switcher */}
+          <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800">
+            <button
+              onClick={() => {
+                setIsReady(false)
+                setViewEngine('google')
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
+                viewEngine === 'google'
+                  ? 'bg-amber-400 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Layers size={12} className="stroke-[2.5]" />
+              <span>Page Reader</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsReady(false)
+                setViewEngine('direct')
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
+                viewEngine === 'direct'
+                  ? 'bg-amber-400 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <FileText size={12} className="stroke-[2.5]" />
+              <span>Direct PDF</span>
+            </button>
+          </div>
+
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors border border-slate-800 hover-bounce"
+          >
+            <ExternalLink size={14} />
+            <span className="hidden sm:inline font-display">New Tab</span>
+          </a>
+
+          <a
+            href={url}
+            download
+            className="p-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors shadow-md hover-bounce"
+          >
+            <Download size={14} className="stroke-[2.5]" />
+            <span className="hidden sm:inline font-display">Download</span>
+          </a>
+
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-white transition-colors border border-transparent hover:border-slate-800"
+            aria-label="Close PDF Viewer"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Frame Container */}
+      <div className="w-full max-w-5xl mx-auto flex-1 bg-slate-950 rounded-b-3xl overflow-hidden shadow-2xl relative flex flex-col border border-slate-800">
+        {!isReady && (
+          <div className="absolute inset-0 z-10 bg-slate-950/90 flex flex-col items-center justify-center gap-3 text-slate-300">
+            <RefreshCw size={26} className="animate-spin text-amber-400 stroke-[2.5]" />
+            <span className="text-xs font-bold font-mono-paper text-amber-400 uppercase tracking-widest">Loading Document Viewer...</span>
+          </div>
+        )}
+        <iframe
+          src={currentSrc}
+          className="w-full h-full border-0 bg-white"
+          title="PDF Document Viewer"
+          onLoad={() => setIsReady(true)}
+        />
+      </div>
+    </div>
+  )
+}
+
