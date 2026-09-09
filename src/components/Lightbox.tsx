@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -22,12 +22,16 @@ export default function Lightbox({
     : []
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     setCurrentIndex(initialIndex)
   }, [initialIndex, images, url])
 
   useEffect(() => {
+    // Focus close button on mount
+    closeBtnRef.current?.focus()
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
@@ -47,6 +51,9 @@ export default function Lightbox({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image lightbox preview"
       className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center animate-fade-in select-none"
       onClick={onClose}
     >
@@ -56,8 +63,9 @@ export default function Lightbox({
           {imageList.length > 1 ? `Page ${currentIndex + 1} of ${imageList.length}` : 'Note Photo'}
         </div>
         <button
+          ref={closeBtnRef}
           onClick={onClose}
-          className="p-2 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-white transition-colors shadow-lg"
+          className="p-2 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-white transition-colors shadow-lg focus-visible:ring-2 focus-visible:ring-amber-400"
           aria-label="Close image viewer"
         >
           <X size={20} />
@@ -82,7 +90,7 @@ export default function Lightbox({
                 e.stopPropagation()
                 setCurrentIndex((prev) => (prev > 0 ? prev - 1 : imageList.length - 1))
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce"
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
               aria-label="Previous page"
             >
               <ChevronLeft size={24} className="stroke-[2.5]" />
@@ -92,7 +100,7 @@ export default function Lightbox({
                 e.stopPropagation()
                 setCurrentIndex((prev) => (prev < imageList.length - 1 ? prev + 1 : 0))
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
               aria-label="Next page"
             >
               <ChevronRight size={24} className="stroke-[2.5]" />

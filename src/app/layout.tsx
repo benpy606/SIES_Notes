@@ -30,8 +30,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full ${plusJakartaSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-full bg-[#FBFBFA] text-[#1A1A18] antialiased">
+    <html lang="en" className={`h-full dark ${plusJakartaSans.variable} ${geistMono.variable}`}>
+      <body className="min-h-full bg-[var(--background)] text-[var(--foreground)] antialiased transition-colors duration-300">
         {children}
       </body>
     </html>

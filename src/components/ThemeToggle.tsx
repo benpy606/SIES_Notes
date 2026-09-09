@@ -10,27 +10,37 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
   useEffect(() => {
     setMounted(true)
     const storedTheme = localStorage.getItem('sies_notes_theme')
+    const root = document.documentElement
     if (storedTheme === 'light') {
       setIsDark(false)
-      document.documentElement.classList.add('light')
-      document.documentElement.classList.remove('dark')
+      root.classList.add('light')
+      root.classList.remove('dark')
+      document.body.classList.add('light')
+      document.body.classList.remove('dark')
     } else {
       setIsDark(true)
-      document.documentElement.classList.add('dark')
-      document.documentElement.classList.remove('light')
+      root.classList.add('dark')
+      root.classList.remove('light')
+      document.body.classList.add('dark')
+      document.body.classList.remove('light')
     }
   }, [])
 
   const toggleTheme = () => {
     const nextDark = !isDark
     setIsDark(nextDark)
+    const root = document.documentElement
     if (nextDark) {
-      document.documentElement.classList.add('dark')
-      document.documentElement.classList.remove('light')
+      root.classList.add('dark')
+      root.classList.remove('light')
+      document.body.classList.add('dark')
+      document.body.classList.remove('light')
       localStorage.setItem('sies_notes_theme', 'dark')
     } else {
-      document.documentElement.classList.add('light')
-      document.documentElement.classList.remove('dark')
+      root.classList.add('light')
+      root.classList.remove('dark')
+      document.body.classList.add('light')
+      document.body.classList.remove('dark')
       localStorage.setItem('sies_notes_theme', 'light')
     }
   }

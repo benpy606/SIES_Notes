@@ -17,14 +17,15 @@ export async function createPost(formData: FormData) {
   const userTitle = (formData.get('title') as string) || ''
   const fileType = (formData.get('fileType') as string) || 'image' // 'image' | 'pdf'
   
-  // Extract all attached images or single image file
+  // Extract all attached images or single image file (capped at max 5 photos)
   const rawImageFiles = formData.getAll('images') as File[]
   const singleImage = formData.get('image') as File | null
-  const imageFiles = rawImageFiles.filter((f) => f && f.size > 0).length > 0
+  const extractedFiles = rawImageFiles.filter((f) => f && f.size > 0).length > 0
     ? rawImageFiles.filter((f) => f && f.size > 0)
     : singleImage && singleImage.size > 0
     ? [singleImage]
     : []
+  const imageFiles = extractedFiles.slice(0, 5)
 
   const pdfFile = formData.get('pdf') as File | null
 
@@ -257,6 +258,62 @@ export async function deletePost(postId: string) {
   revalidatePath('/')
 }
 
+export async function togglePinPost(postId: string) {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.is_admin) throw new Error('Not authorized as admin')
+
+  const { data: post } = await supabase
+    .from('posts')
+    .select('id, is_pinned')
+    .eq('id', postId)
+    .maybeSingle()
+
+  if (post) {
+    const nextPinnedState = !post.is_pinned
+    await supabase.from('posts').update({ is_pinned: nextPinnedState }).eq('id', postId)
+  }
+  revalidatePath('/')
+}
+
+export async function toggleVerifyPost(postId: string) {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.is_admin) throw new Error('Not authorized as admin')
+
+  const { data: post } = await supabase
+    .from('posts')
+    .select('id, is_verified')
+    .eq('id', postId)
+    .maybeSingle()
+
+  if (post) {
+    const nextVerifiedState = !post.is_verified
+    await supabase.from('posts').update({ is_verified: nextVerifiedState }).eq('id', postId)
+  }
+  revalidatePath('/')
+}
+
 export async function toggleUpvote(postId: string) {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
@@ -352,17 +409,18 @@ export async function createLecture(formData: FormData) {
   revalidatePath('/')
 }
 
-const MUTED_EDITORIAL_COLORS = [
-  '#4A5D4E',
-  '#3D4A56',
-  '#6E5A4B',
-  '#5A4E5D',
-  '#4E5A5A',
-  '#5D4A5A',
+const VIBRANT_SUBJECT_COLORS = [
+  '#818CF8',
+  '#F59E0B',
+  '#10B981',
+  '#EC4899',
+  '#06B6D4',
+  '#8B5CF6',
+  '#F97316',
 ]
 
 function randomMutedColor(): string {
-  return MUTED_EDITORIAL_COLORS[Math.floor(Math.random() * MUTED_EDITORIAL_COLORS.length)]
+  return VIBRANT_SUBJECT_COLORS[Math.floor(Math.random() * VIBRANT_SUBJECT_COLORS.length)]
 }
 
 export async function createSubject(formData: FormData) {

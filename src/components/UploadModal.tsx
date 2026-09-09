@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPost } from '@/app/actions'
 import { compressImage } from '@/lib/compressor'
 import { X, Upload, FileText, Image as ImageIcon, Check, Sparkles, Plus, Layers } from 'lucide-react'
@@ -45,20 +45,50 @@ export default function UploadModal({
 
   const imageInputRef = useRef<HTMLInputElement>(null)
   const pdfInputRef = useRef<HTMLInputElement>(null)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      closeBtnRef.current?.focus()
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
+
+  const MAX_IMAGES = 5
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
     setError(null)
+
+    const currentCount = selectedImages.length
+    if (currentCount >= MAX_IMAGES) {
+      setError(`Maximum limit of ${MAX_IMAGES} photos per post reached.`)
+      if (imageInputRef.current) imageInputRef.current.value = ''
+      return
+    }
+
     setIsCompressing(true)
 
-    const newItems: SelectedImage[] = []
+    const availableSlots = MAX_IMAGES - currentCount
+    const filesToProcess = Array.from(files).slice(0, availableSlots)
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
+    if (files.length > availableSlots) {
+      setError(`Only ${availableSlots} more photo(s) added. Maximum limit is ${MAX_IMAGES} photos per post.`)
+    }
+
+    const newItems: SelectedImage[] = []
+    for (let i = 0; i < filesToProcess.length; i++) {
+      const file = filesToProcess[i]
       const preview = URL.createObjectURL(file)
       newItems.push({
         id: Math.random().toString(36).substring(7),
@@ -158,7 +188,12 @@ export default function UploadModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="upload-modal-title"
+      className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+    >
       <div className="w-full max-w-lg bg-slate-950 text-slate-100 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-800 animate-pop-in">
         {/* Header */}
         <div className="flex justify-between items-center pb-3.5 border-b border-slate-800">
@@ -167,13 +202,15 @@ export default function UploadModal({
               <Sparkles size={18} className="stroke-[2.5]" />
             </div>
             <div>
-              <h3 className="font-display font-black text-lg text-slate-50 leading-none">Upload Class Note</h3>
+              <h3 id="upload-modal-title" className="font-display font-black text-lg text-slate-50 leading-none">Upload Class Note</h3>
               <p className="text-[11px] text-slate-400 font-bold mt-1">Share single or multi-page handwritten notes or PDFs</p>
             </div>
           </div>
           <button
+            ref={closeBtnRef}
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors border border-slate-800"
+            aria-label="Close upload dialog"
+            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors border border-slate-800 focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             <X size={18} />
           </button>
@@ -277,7 +314,7 @@ export default function UploadModal({
                 {selectedImages.length > 0 && (
                   <span className="text-[10px] font-bold text-amber-400 font-mono-paper flex items-center gap-1">
                     <Layers size={11} />
-                    {selectedImages.length} {selectedImages.length === 1 ? 'Page' : 'Pages'} Selected
+                    {selectedImages.length} / {MAX_IMAGES} Pages Selected
                   </span>
                 )}
               </div>
@@ -302,7 +339,7 @@ export default function UploadModal({
                     <Upload size={20} className="stroke-[2.5]" />
                   </div>
                   <span className="text-xs font-extrabold text-slate-200">Choose Note Images</span>
-                  <span className="text-[10px] text-slate-500 font-medium">Select single photo or multiple pages at once</span>
+                  <span className="text-[10px] text-slate-500 font-medium">Select up to 5 photos per note post</span>
                 </button>
               ) : (
                 <div className="space-y-3">
@@ -328,11 +365,16 @@ export default function UploadModal({
 
                   <button
                     type="button"
+                    disabled={selectedImages.length >= MAX_IMAGES}
                     onClick={() => imageInputRef.current?.click()}
-                    className="w-full py-2.5 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center gap-2 transition-all hover-bounce"
+                    className={`w-full py-2.5 rounded-xl border border-dashed text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                      selectedImages.length >= MAX_IMAGES
+                        ? 'border-slate-800 bg-slate-900/40 text-slate-500 cursor-not-allowed'
+                        : 'border-slate-700 hover:border-amber-400 bg-slate-900 text-slate-300 hover:text-white hover-bounce'
+                    }`}
                   >
-                    <Plus size={14} className="text-amber-400 stroke-[3]" />
-                    <span>Add More Pages</span>
+                    <Plus size={14} className={selectedImages.length >= MAX_IMAGES ? 'text-slate-600' : 'text-amber-400 stroke-[3]'} />
+                    <span>{selectedImages.length >= MAX_IMAGES ? `Max ${MAX_IMAGES} Photos Reached` : 'Add More Pages'}</span>
                   </button>
                 </div>
               )}

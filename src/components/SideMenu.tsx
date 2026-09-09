@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { X, LogOut, BookOpen, Upload, FileText, Image as ImageIcon, User, Filter, Sparkles } from 'lucide-react'
 import { signOut } from '@/app/actions'
 
@@ -36,10 +37,30 @@ export default function SideMenu({
   onSelectFileType: (type: 'all' | 'image' | 'pdf') => void
   onOpenUpload: () => void
 }) {
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      closeBtnRef.current?.focus()
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex animate-fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation drawer"
+      className="fixed inset-0 z-50 flex animate-fade-in"
+    >
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"
@@ -64,8 +85,9 @@ export default function SideMenu({
             </div>
           </div>
           <button
+            ref={closeBtnRef}
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-700"
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus-visible:ring-2 focus-visible:ring-amber-400"
             aria-label="Close menu"
           >
             <X size={20} />

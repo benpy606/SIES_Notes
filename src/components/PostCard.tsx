@@ -1,9 +1,27 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { deletePost, toggleUpvote } from '@/app/actions'
+import { deletePost, toggleUpvote, togglePinPost, toggleVerifyPost } from '@/app/actions'
 import Image from 'next/image'
-import { Heart, MoreHorizontal, Trash2, User, FileText, Download, ExternalLink, Calendar, ChevronLeft, ChevronRight, Layers } from 'lucide-react'
+import {
+  Heart,
+  MoreHorizontal,
+  Trash2,
+  User,
+  FileText,
+  Download,
+  ExternalLink,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  Shield,
+  Pin,
+  CheckCircle2,
+  Copy,
+  Check,
+  Sparkles,
+} from 'lucide-react'
 import { getPostSubject } from './PostList'
 
 type Subject = {
@@ -22,6 +40,8 @@ type PostWithRelations = {
   pdf_url?: string | null
   file_type?: string
   caption?: string
+  is_pinned?: boolean
+  is_verified?: boolean
   created_at: string
   subject?: any
   lecture?: any
@@ -49,19 +69,38 @@ export default function PostCardComponent({
   onPdfClick: (url: string, title: string) => void
 }) {
   const [showMenu, setShowMenu] = useState(false)
+  const [showAdminMenu, setShowAdminMenu] = useState(false)
   const [hasUpvoted, setHasUpvoted] = useState(false)
   const [upvoteCount, setUpvoteCount] = useState(post.upvotes?.[0]?.count ?? 0)
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
 
+  const [isPinned, setIsPinned] = useState(!!post.is_pinned)
+  const [isVerified, setIsVerified] = useState(!!post.is_verified)
+  const [copied, setCopied] = useState(false)
+
   const carouselRef = useRef<HTMLDivElement>(null)
 
-  const canDelete = isAdmin || post.user_id === currentUserId
+  const isOwner = post.user_id === currentUserId
+  const canDelete = isAdmin || isOwner
 
   // Resolve subject robustly
   const subjectObj = getPostSubject(post, subjects)
   const subjectName = subjectObj?.name || 'General'
-  const subjectColor = subjectObj?.color_code || '#EA580C'
+  const rawSubjectColor = subjectObj?.color_code || '#F59E0B'
+
+  // Ensure subject color is sufficiently bright for dark surfaces
+  const getHighContrastColor = (color: string) => {
+    if (!color || !color.startsWith('#') || color.length !== 7) return '#818CF8'
+    const r = parseInt(color.slice(1, 3), 16)
+    const g = parseInt(color.slice(3, 5), 16)
+    const b = parseInt(color.slice(5, 7), 16)
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000
+    if (brightness < 110) return '#818CF8'
+    return color
+  }
+
+  const subjectColor = getHighContrastColor(rawSubjectColor)
 
   const rawTitle =
     post.title ||
@@ -77,7 +116,7 @@ export default function PostCardComponent({
       : `${subjectName} Note`
 
   const handleDelete = async () => {
-    if (!confirm('Delete this post?')) return
+    if (!confirm('Are you sure you want to delete this post?')) return
     setIsDeleting(true)
     try {
       await deletePost(post.id)
@@ -85,6 +124,33 @@ export default function PostCardComponent({
       console.error(e)
       setIsDeleting(false)
     }
+  }
+
+  const handleAdminPinToggle = async () => {
+    try {
+      await togglePinPost(post.id)
+      setIsPinned(!isPinned)
+      setShowAdminMenu(false)
+    } catch (e) {
+      console.error('Failed toggling pin status:', e)
+    }
+  }
+
+  const handleAdminVerifyToggle = async () => {
+    try {
+      await toggleVerifyPost(post.id)
+      setIsVerified(!isVerified)
+      setShowAdminMenu(false)
+    } catch (e) {
+      console.error('Failed toggling verify status:', e)
+    }
+  }
+
+  const handleCopyMeta = () => {
+    navigator.clipboard.writeText(`Post ID: ${post.id}\nAuthor ID: ${post.user_id}\nCreated: ${post.created_at}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+    setShowAdminMenu(false)
   }
 
   const handleUpvote = async () => {
@@ -155,10 +221,20 @@ export default function PostCardComponent({
   }
 
   return (
-    <article className="paper-card bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col group transition-all animate-slide-up shadow-md">
+    <article className={`paper-card bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-md ${
+      isPinned ? 'border-amber-400/80 ring-1 ring-amber-400/30' : 'border-slate-200 dark:border-slate-800'
+    }`}>
+      {/* Pinned Note Banner */}
+      {isPinned && (
+        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 px-4 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 font-mono-paper shadow-xs">
+          <Pin size={12} className="fill-slate-950 stroke-none" />
+          <span>Pinned Announcement Note</span>
+        </div>
+      )}
+
       {/* Card Header */}
       <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span
             className="w-3.5 h-3.5 rounded-full ring-2 ring-slate-200 dark:ring-white/30 shadow-xs shrink-0"
             style={{ backgroundColor: subjectColor }}
@@ -167,47 +243,128 @@ export default function PostCardComponent({
             className="text-[11px] font-black tracking-wider uppercase font-mono-paper px-2.5 py-1 rounded-lg border shadow-xs"
             style={{
               color: subjectColor,
-              borderColor: `${subjectColor}50`,
-              backgroundColor: `${subjectColor}15`,
+              borderColor: `${subjectColor}40`,
+              backgroundColor: `${subjectColor}20`,
             }}
           >
             {subjectName}
           </span>
+          {isVerified && (
+            <span className="text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1 font-mono-paper">
+              <CheckCircle2 size={11} className="stroke-[2.5]" />
+              Verified Note
+            </span>
+          )}
           <span
             suppressHydrationWarning
-            className="text-[11px] text-slate-500 dark:text-slate-300 font-bold flex items-center gap-1"
+            className="text-[11px] text-slate-600 dark:text-slate-300 font-bold flex items-center gap-1"
           >
             <Calendar size={12} className="text-amber-500 dark:text-amber-400" />
             {formattedDate}
           </span>
         </div>
 
-        {canDelete && (
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              aria-label="Options"
-              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-            >
-              <MoreHorizontal size={18} />
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 top-9 w-36 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
-                <button
-                  onClick={() => {
-                    setShowMenu(false)
-                    handleDelete()
-                  }}
-                  disabled={isDeleting}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors"
-                >
-                  <Trash2 size={14} />
-                  <span>Delete Post</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Options / Admin Special Menu */}
+        <div className="flex items-center gap-1.5">
+          {/* Dedicated Admin Special Menu Button (Visible strictly to Admin Users) */}
+          {isAdmin && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAdminMenu(!showAdminMenu)
+                  setShowMenu(false)
+                }}
+                aria-label="Admin Special Menu"
+                className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/10 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-500 dark:text-amber-400 text-xs font-black flex items-center gap-1.5 transition-all shadow-xs"
+              >
+                <Shield size={14} className="stroke-[2.5]" />
+                <span className="hidden sm:inline uppercase text-[10px] tracking-wider font-mono-paper">Admin Menu</span>
+              </button>
+
+              {/* Admin Special Dropdown Menu */}
+              {showAdminMenu && (
+                <div className="absolute right-0 top-10 w-52 bg-slate-950 text-slate-100 border border-amber-500/40 rounded-2xl shadow-2xl z-30 overflow-hidden animate-pop-in p-1.5 backdrop-blur-md">
+                  <div className="px-3 py-2 border-b border-slate-800 text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono-paper flex items-center justify-between">
+                    <span>Admin Controls</span>
+                    <Shield size={12} />
+                  </div>
+                  <div className="p-1 space-y-1">
+                    <button
+                      type="button"
+                      onClick={handleAdminPinToggle}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-900 rounded-xl transition-colors text-left"
+                    >
+                      <Pin size={14} className={`stroke-[2] ${isPinned ? 'text-amber-400 fill-amber-400' : 'text-slate-400'}`} />
+                      <span>{isPinned ? 'Unpin Note' : 'Pin to Top'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleAdminVerifyToggle}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-900 rounded-xl transition-colors text-left"
+                    >
+                      <CheckCircle2 size={14} className={`stroke-[2] ${isVerified ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <span>{isVerified ? 'Remove Verification' : 'Mark as Verified'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyMeta}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-900 rounded-xl transition-colors text-left"
+                    >
+                      {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-slate-400" />}
+                      <span>{copied ? 'Copied Meta!' : 'Copy Note ID'}</span>
+                    </button>
+
+                    <div className="border-t border-slate-800/80 my-1" />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAdminMenu(false)
+                        handleDelete()
+                      }}
+                      disabled={isDeleting}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/60 rounded-xl transition-colors text-left"
+                    >
+                      <Trash2 size={14} className="stroke-[2]" />
+                      <span>Delete Post (Admin)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Standard Author Option Menu (for non-admin owners) */}
+          {!isAdmin && isOwner && (
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                aria-label="Author Options"
+                className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+              >
+                <MoreHorizontal size={18} />
+              </button>
+              {showMenu && (
+                <div className="absolute right-0 top-9 w-36 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false)
+                      handleDelete()
+                    }}
+                    disabled={isDeleting}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={14} />
+                    <span>Delete Post</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Note Title */}
@@ -382,9 +539,9 @@ export default function PostCardComponent({
       )}
 
       {/* Footer */}
-      <div className="px-5 py-3.5 bg-slate-50/80 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between mt-auto transition-colors">
+      <div className="px-5 py-3.5 bg-slate-100/90 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between mt-auto transition-colors">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-amber-400/20 text-slate-900 dark:text-amber-400 font-mono-paper text-[11px] font-black flex items-center justify-center shadow-xs ring-1 ring-amber-500/30">
+          <div className="w-7 h-7 rounded-full bg-amber-500/20 text-slate-800 dark:text-amber-400 font-mono-paper text-[11px] font-black flex items-center justify-center shadow-xs ring-1 ring-amber-500/40">
             {authorProfile?.full_name ? authorProfile.full_name.charAt(0) : <User size={12} />}
           </div>
           <span className="text-xs font-bold text-slate-900 dark:text-white font-display">
@@ -397,7 +554,7 @@ export default function PostCardComponent({
           className={`min-h-[38px] px-3.5 rounded-full flex items-center gap-1.5 text-xs font-black transition-all hover-bounce ${
             hasUpvoted
               ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-300 animate-heart-pulse'
-              : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 shadow-xs'
+              : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-xs'
           }`}
         >
           <Heart size={15} className={hasUpvoted ? 'fill-white text-white' : 'text-slate-400 stroke-[2.2]'} />
