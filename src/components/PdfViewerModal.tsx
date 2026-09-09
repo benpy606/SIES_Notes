@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, ExternalLink, Download, FileText, Layers, RefreshCw } from 'lucide-react'
+import { X, ExternalLink, Download, FileText, RefreshCw } from 'lucide-react'
 
 export default function PdfViewerModal({
   url,
@@ -12,14 +12,9 @@ export default function PdfViewerModal({
   title?: string
   onClose: () => void
 }) {
-  const [viewEngine, setViewEngine] = useState<'google' | 'direct'>('google')
   const [isReady, setIsReady] = useState(false)
 
   if (!url) return null
-
-  const encodedUrl = encodeURIComponent(url)
-  const googleViewerUrl = `https://docs.google.com/viewer?url=${encodedUrl}&embedded=true`
-  const currentSrc = viewEngine === 'google' ? googleViewerUrl : url
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col p-2 sm:p-6 animate-fade-in">
@@ -35,45 +30,13 @@ export default function PdfViewerModal({
               {title || 'PDF Note Document'}
             </span>
             <span className="text-[10px] font-mono-paper uppercase tracking-wider text-amber-400 font-bold">
-              PDF Interactive Reader
+              PDF Document Reader
             </span>
           </div>
         </div>
 
         {/* Controls */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Engine Switcher */}
-          <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => {
-                setIsReady(false)
-                setViewEngine('google')
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
-                viewEngine === 'google'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <Layers size={12} className="stroke-[2.5]" />
-              <span>Page Reader</span>
-            </button>
-            <button
-              onClick={() => {
-                setIsReady(false)
-                setViewEngine('direct')
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-black transition-all ${
-                viewEngine === 'direct'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <FileText size={12} className="stroke-[2.5]" />
-              <span>Direct PDF</span>
-            </button>
-          </div>
-
           <a
             href={url}
             target="_blank"
@@ -86,7 +49,7 @@ export default function PdfViewerModal({
 
           <a
             href={url}
-            download
+            download={`${(title || 'Note').replace(/[^a-zA-Z0-9.-]/g, '_')}.pdf`}
             className="p-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors shadow-md hover-bounce"
           >
             <Download size={14} className="stroke-[2.5]" />
@@ -108,17 +71,23 @@ export default function PdfViewerModal({
         {!isReady && (
           <div className="absolute inset-0 z-10 bg-slate-950/90 flex flex-col items-center justify-center gap-3 text-slate-300">
             <RefreshCw size={26} className="animate-spin text-amber-400 stroke-[2.5]" />
-            <span className="text-xs font-bold font-mono-paper text-amber-400 uppercase tracking-widest">Loading Document Viewer...</span>
+            <span className="text-xs font-bold font-mono-paper text-amber-400 uppercase tracking-widest">Loading PDF Document...</span>
           </div>
         )}
-        <iframe
-          src={currentSrc}
-          className="w-full h-full border-0 bg-white"
-          title="PDF Document Viewer"
+        <object
+          data={url}
+          type="application/pdf"
+          className="w-full h-full border-0 bg-slate-900"
           onLoad={() => setIsReady(true)}
-        />
+        >
+          <iframe
+            src={url}
+            className="w-full h-full border-0 bg-slate-900"
+            title="PDF Document Viewer"
+            onLoad={() => setIsReady(true)}
+          />
+        </object>
       </div>
     </div>
   )
 }
-
