@@ -16,8 +16,11 @@ export default function PdfViewerModal({
   const closeBtnRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
+    setIsReady(false)
     if (url) {
       closeBtnRef.current?.focus()
+      const timer = setTimeout(() => setIsReady(true), 1500)
+      return () => clearTimeout(timer)
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && url) {

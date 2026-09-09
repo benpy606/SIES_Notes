@@ -19,6 +19,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -26,11 +27,12 @@ export default function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setSuccessMessage(null)
     setLoading(true)
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -38,7 +40,13 @@ export default function LoginForm() {
           },
         })
         if (error) throw error
-        setError('Check your email for the confirmation link!')
+        if (data?.session) {
+          router.push('/')
+          router.refresh()
+        } else {
+          setSuccessMessage('Account registered successfully! You can now sign in directly.')
+          setIsSignUp(false)
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -98,6 +106,12 @@ export default function LoginForm() {
             </span>
           </div>
         </div>
+
+        {successMessage && (
+          <div className="mb-5 p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/50 text-xs font-bold text-emerald-300 text-center animate-fade-in">
+            {successMessage}
+          </div>
+        )}
 
         {error && (
           <div className="mb-5 p-3.5 rounded-2xl bg-rose-950/80 border border-rose-500/50 text-xs font-bold text-rose-300 text-center animate-fade-in">

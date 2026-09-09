@@ -43,5 +43,5 @@ export async function signup(formData: FormData) {
     return NextResponse.redirect(new URL('/login?error=' + encodeURIComponent(error.message), process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
   }
 
-  return NextResponse.redirect(new URL('/login?message=check+your+email+for+confirmation', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
+  return NextResponse.redirect(new URL('/login?message=Account+registered+successfully!+You+can+now+sign+in.', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
 }

@@ -120,8 +120,9 @@ export default function PostCardComponent({
     setIsDeleting(true)
     try {
       await deletePost(post.id)
-    } catch (e) {
-      console.error(e)
+    } catch (e: any) {
+      console.error('Delete post error:', e)
+      alert(e?.message || 'Failed to delete post. Please try again.')
       setIsDeleting(false)
     }
   }
@@ -212,11 +213,14 @@ export default function PostCardComponent({
 
   const scrollToPage = (targetIndex: number) => {
     if (!carouselRef.current) return
-    const width = carouselRef.current.clientWidth
-    carouselRef.current.scrollTo({
-      left: targetIndex * width,
-      behavior: 'smooth',
-    })
+    const container = carouselRef.current
+    const width = container.clientWidth || container.offsetWidth || 0
+    if (width > 0) {
+      container.scrollTo({
+        left: targetIndex * width,
+        behavior: 'smooth',
+      })
+    }
     setActiveImageIndex(targetIndex)
   }
 
@@ -266,7 +270,7 @@ export default function PostCardComponent({
 
         {/* Options / Admin Special Menu */}
         <div className="flex items-center gap-1.5">
-          {/* Dedicated Admin Special Menu Button (Visible strictly to Admin Users) */}
+          {/* Explicit Dedicated Admin Menu Button */}
           {isAdmin && (
             <div className="relative">
               <button
@@ -337,28 +341,33 @@ export default function PostCardComponent({
             </div>
           )}
 
-          {/* Standard Author Option Menu (for non-admin owners) */}
-          {!isAdmin && isOwner && (
+          {/* Post Options Menu for Owner or Admin */}
+          {canDelete && (
             <div className="relative">
               <button
-                onClick={() => setShowMenu(!showMenu)}
-                aria-label="Author Options"
+                type="button"
+                onClick={() => {
+                  setShowMenu(!showMenu)
+                  setShowAdminMenu(false)
+                }}
+                aria-label="Post Options"
                 className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
               >
                 <MoreHorizontal size={18} />
               </button>
               {showMenu && (
-                <div className="absolute right-0 top-9 w-36 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
+                <div className="absolute right-0 top-9 w-40 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
                   <button
+                    type="button"
                     onClick={() => {
                       setShowMenu(false)
                       handleDelete()
                     }}
                     disabled={isDeleting}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors text-left"
                   >
                     <Trash2 size={14} />
-                    <span>Delete Post</span>
+                    <span>{isAdmin && !isOwner ? 'Delete (Admin)' : 'Delete Post'}</span>
                   </button>
                 </div>
               )}
@@ -471,27 +480,36 @@ export default function PostCardComponent({
       {effectivePdfUrl && (
         <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/pdf">
           <div
-            className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center"
+            className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-center"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
-            {/* Styled PDF Icon Card */}
-            <div className="w-20 h-24 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-400/40 group-hover/pdf:border-amber-400 flex flex-col items-center justify-center gap-2 shadow-xl transition-all group-hover/pdf:scale-105">
-              <FileText size={32} className="text-amber-500 dark:text-amber-400 stroke-[2.2]" />
-              <span className="text-[9px] font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest font-mono-paper">PDF</span>
+            {/* Embedded Live PDF First-Page Document Preview */}
+            <iframe
+              src={`${effectivePdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+              title={topicTitle}
+              className="w-full h-full border-0 pointer-events-none select-none"
+              loading="lazy"
+            />
+
+            {/* Fallback Icon Card if frame background */}
+            <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-950">
+              <div className="w-16 h-20 rounded-2xl bg-slate-900 border-2 border-amber-400/40 flex flex-col items-center justify-center gap-1.5 shadow-xl">
+                <FileText size={28} className="text-amber-400 stroke-[2.2]" />
+                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest font-mono-paper">PDF</span>
+              </div>
+              <span className="mt-2 text-xs font-extrabold text-slate-200 font-display line-clamp-1 max-w-[200px]">
+                {topicTitle}
+              </span>
             </div>
 
-            <span className="mt-3.5 text-xs font-extrabold text-slate-900 dark:text-slate-200 font-display line-clamp-1 max-w-[220px]">
-              {topicTitle}
-            </span>
-
             {/* Top Right Format Badge */}
-            <div className="absolute top-3 right-3 z-10 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-950/30 font-mono-paper">
+            <div className="absolute top-3 right-3 z-10 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-950/30 font-mono-paper pointer-events-none">
               <FileText size={12} className="stroke-[2.5]" />
               <span>PDF Document</span>
             </div>
 
             {/* Hover / Tap to Expand Overlay */}
-            <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover/pdf:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
+            <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/pdf:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
               <span className="text-xs font-extrabold text-white bg-slate-950/90 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 border border-white/20">
                 <ExternalLink size={14} className="stroke-[2.5]" />
                 Tap to Open PDF Reader

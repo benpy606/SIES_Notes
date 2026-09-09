@@ -74,7 +74,7 @@ export async function createPost(formData: FormData) {
     }
 
     if (imageUrls.length > 0) {
-      imageUrl = imageUrls[0]
+      imageUrl = imageUrls.join(',')
     }
   } else if (fileType === 'pdf' && pdfFile && pdfFile.size > 0) {
     const filePath = `${user.id}/${Date.now()}_${pdfFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
@@ -217,14 +217,15 @@ export async function deletePost(postId: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const { data: post } = await supabase
+  // 1. Safely query post ownership without failing if optional schema columns are absent
+  const { data: basicPost, error: basicErr } = await supabase
     .from('posts')
-    .select('id, user_id, image_url, image_urls, pdf_url')
+    .select('id, user_id')
     .eq('id', postId)
     .maybeSingle()
 
-  if (!post) {
-    // Post has already been deleted; revalidate feed and return cleanly
+  if (basicErr || !basicPost) {
+    console.warn('Post not found or basic select error:', basicErr?.message)
     revalidatePath('/')
     return
   }
@@ -233,28 +234,59 @@ export async function deletePost(postId: string) {
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
-  const isOwner = post.user_id === user.id
+  const isOwner = basicPost.user_id === user.id
   const isAdmin = profile?.is_admin === true
 
-  if (!isOwner && !isAdmin) throw new Error('Not authorized')
+  if (!isOwner && !isAdmin) throw new Error('Not authorized to delete this post')
 
-  // Remove files from Supabase storage buckets
-  if (Array.isArray(post.image_urls) && post.image_urls.length > 0) {
-    for (const url of post.image_urls) {
+  // 2. Fetch associated file URLs safely
+  const { data: mediaData } = await supabase
+    .from('posts')
+    .select('image_url, image_urls, pdf_url')
+    .eq('id', postId)
+    .maybeSingle()
+
+  const imageUrl = mediaData?.image_url
+  const imageUrls = mediaData?.image_urls
+  const pdfUrl = mediaData?.pdf_url
+
+  // 3. Delete dependent rows in upvotes table first (prevents FK constraint violation)
+  try {
+    await supabase.from('upvotes').delete().eq('post_id', postId)
+  } catch (upvErr) {
+    console.warn('Notice deleting related upvotes:', upvErr)
+  }
+
+  // 4. Delete the post row
+  const { error: deleteErr } = await supabase.from('posts').delete().eq('id', postId)
+  if (deleteErr) {
+    console.error('Failed deleting post from database:', deleteErr.message)
+    throw new Error(deleteErr.message || 'Failed to delete post')
+  }
+
+  // 5. Cleanup storage files in background safely
+  try {
+    const urlsToDelete: string[] = []
+    if (Array.isArray(imageUrls)) {
+      urlsToDelete.push(...imageUrls)
+    }
+    if (typeof imageUrl === 'string') {
+      urlsToDelete.push(...imageUrl.split(',').map((s) => s.trim()))
+    }
+    if (pdfUrl) {
+      urlsToDelete.push(pdfUrl)
+    }
+
+    const uniqueUrls = Array.from(new Set(urlsToDelete.filter(Boolean)))
+    for (const url of uniqueUrls) {
       await deleteStorageFile(url, supabase)
     }
-  } else if (post.image_url) {
-    await deleteStorageFile(post.image_url, supabase)
+  } catch (stErr) {
+    console.warn('Non-fatal storage cleanup notice:', stErr)
   }
 
-  if (post.pdf_url) {
-    await deleteStorageFile(post.pdf_url, supabase)
-  }
-
-  // Remove post from database
-  await supabase.from('posts').delete().eq('id', postId)
   revalidatePath('/')
 }
 

@@ -127,6 +127,9 @@ export default function UploadModal({
     setError(null)
   }
 
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatusText, setUploadStatusText] = useState('')
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!subjectId) {
@@ -146,6 +149,8 @@ export default function UploadModal({
 
     setSaving(true)
     setError(null)
+    setUploadProgress(15)
+    setUploadStatusText('Preparing note files...')
 
     try {
       const formData = new FormData()
@@ -155,7 +160,11 @@ export default function UploadModal({
       formData.set('fileType', fileType)
 
       if (fileType === 'image') {
-        for (const item of selectedImages) {
+        const total = selectedImages.length
+        for (let i = 0; i < total; i++) {
+          const item = selectedImages[i]
+          setUploadStatusText(`Compressing page ${i + 1} of ${total}...`)
+          setUploadProgress(20 + Math.floor(((i + 1) / total) * 50))
           try {
             const compressed = await compressImage(item.file)
             formData.append('images', compressed)
@@ -164,10 +173,15 @@ export default function UploadModal({
           }
         }
       } else if (fileType === 'pdf' && pdfFile) {
+        setUploadStatusText('Processing PDF document...')
+        setUploadProgress(50)
         formData.set('pdf', pdfFile)
       }
 
+      setUploadStatusText('Publishing to SIES Notes Vault...')
+      setUploadProgress(85)
       await createPost(formData)
+      setUploadProgress(100)
       onClose()
       setTitle('')
       setCaption('')
@@ -184,6 +198,7 @@ export default function UploadModal({
       setError(msg)
     } finally {
       setSaving(false)
+      setUploadProgress(0)
     }
   }
 
@@ -420,13 +435,28 @@ export default function UploadModal({
             </div>
           )}
 
+          {saving && (
+            <div className="space-y-2 pt-2 animate-fade-in">
+              <div className="flex justify-between items-center text-[10px] font-mono-paper font-black">
+                <span className="text-amber-400 uppercase tracking-widest">{uploadStatusText}</span>
+                <span className="text-slate-300">{uploadProgress}%</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner">
+                <div
+                  className="h-full bg-gradient-to-r from-orange-600 via-amber-400 to-emerald-400 rounded-full transition-all duration-300 progress-animated-striped shadow-md"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={saving || isCompressing}
             className="w-full mt-5 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 py-3.5 text-xs font-black uppercase tracking-wider text-white transition-all disabled:opacity-50 shadow-lg shadow-orange-600/30 hover-bounce"
           >
             {saving ? (
-              <span>Compressing & Publishing...</span>
+              <span>Publishing Note... ({uploadProgress}%)</span>
             ) : (
               <>
                 <Check size={16} className="stroke-[3]" />
