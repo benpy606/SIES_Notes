@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { deletePost, toggleUpvote } from '@/app/actions'
 import Image from 'next/image'
 import { Heart, MoreHorizontal, Trash2, User, FileText, Download, ExternalLink, Calendar, ChevronLeft, ChevronRight, Layers } from 'lucide-react'
@@ -53,6 +53,8 @@ export default function PostCardComponent({
   const [upvoteCount, setUpvoteCount] = useState(post.upvotes?.[0]?.count ?? 0)
   const [isDeleting, setIsDeleting] = useState(false)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  const carouselRef = useRef<HTMLDivElement>(null)
 
   const canDelete = isAdmin || post.user_id === currentUserId
 
@@ -116,9 +118,26 @@ export default function PostCardComponent({
     ? [post.image_url]
     : []
 
-  const currentImageUrl = allImageUrls[activeImageIndex] || allImageUrls[0]
-
   const authorProfile = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles
+
+  const handleScroll = () => {
+    if (!carouselRef.current) return
+    const { scrollLeft, clientWidth } = carouselRef.current
+    if (clientWidth > 0) {
+      const index = Math.round(scrollLeft / clientWidth)
+      setActiveImageIndex(index)
+    }
+  }
+
+  const scrollToPage = (targetIndex: number) => {
+    if (!carouselRef.current) return
+    const width = carouselRef.current.clientWidth
+    carouselRef.current.scrollTo({
+      left: targetIndex * width,
+      behavior: 'smooth',
+    })
+    setActiveImageIndex(targetIndex)
+  }
 
   return (
     <article className="paper-card overflow-hidden flex flex-col group transition-all animate-slide-up">
@@ -183,36 +202,46 @@ export default function PostCardComponent({
         </h3>
       </div>
 
-      {/* Note Image Media Carousel */}
-      {allImageUrls.length > 0 && currentImageUrl && (
+      {/* Touch Swipeable Multi-Image Media Carousel */}
+      {allImageUrls.length > 0 && (
         <div className="w-full bg-slate-900 relative border-t border-b border-slate-800 overflow-hidden group/img">
-          <div
-            className="w-full aspect-[4/3] relative cursor-zoom-in overflow-hidden"
-            onClick={() => onImageClick(allImageUrls, activeImageIndex)}
-          >
-            <Image
-              src={currentImageUrl}
-              alt={`Lecture note preview page ${activeImageIndex + 1}`}
-              fill
-              unoptimized
-              className="object-cover transition-transform duration-500 group-hover/img:scale-105"
-              loading="lazy"
-            />
-
-            {/* Top Multi-Page Badge */}
-            {allImageUrls.length > 1 && (
-              <div className="absolute top-3 right-3 z-10 bg-slate-950/85 backdrop-blur-md text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-slate-700/80 shadow-lg flex items-center gap-1.5 font-mono-paper">
-                <Layers size={12} className="stroke-[2.5]" />
-                <span>{activeImageIndex + 1} / {allImageUrls.length} Pages</span>
-              </div>
-            )}
-
-            {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs pointer-events-none">
-              <span className="text-xs font-extrabold text-white bg-slate-950/80 px-4 py-2 rounded-full shadow-xl border border-white/20">
-                Tap to Expand Gallery
-              </span>
+          {/* Top Multi-Page Badge Overlay */}
+          {allImageUrls.length > 1 && (
+            <div className="absolute top-3 right-3 z-20 bg-slate-950/85 backdrop-blur-md text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-slate-700/80 shadow-lg flex items-center gap-1.5 font-mono-paper pointer-events-none">
+              <Layers size={12} className="stroke-[2.5]" />
+              <span>{activeImageIndex + 1} / {allImageUrls.length} Pages</span>
             </div>
+          )}
+
+          {/* Swipeable Scroll Container */}
+          <div
+            ref={carouselRef}
+            onScroll={handleScroll}
+            className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar w-full"
+          >
+            {allImageUrls.map((url, idx) => (
+              <div
+                key={idx}
+                className="w-full shrink-0 snap-center aspect-[4/3] relative cursor-zoom-in overflow-hidden"
+                onClick={() => onImageClick(allImageUrls, idx)}
+              >
+                <Image
+                  src={url}
+                  alt={`Lecture note preview page ${idx + 1}`}
+                  fill
+                  unoptimized
+                  className="object-cover transition-transform duration-500 group-hover/img:scale-105"
+                  loading={idx === 0 ? 'eager' : 'lazy'}
+                />
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs pointer-events-none">
+                  <span className="text-xs font-extrabold text-white bg-slate-950/80 px-4 py-2 rounded-full shadow-xl border border-white/20">
+                    Tap to Expand Gallery
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Carousel Next / Prev Controls */}
@@ -222,9 +251,10 @@ export default function PostCardComponent({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
-                  setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : allImageUrls.length - 1))
+                  const prevIdx = activeImageIndex > 0 ? activeImageIndex - 1 : allImageUrls.length - 1
+                  scrollToPage(prevIdx)
                 }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white/90 hover:text-amber-400 border border-slate-800 shadow-xl transition-all hover-bounce z-10"
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/75 hover:bg-slate-950 text-white/90 hover:text-amber-400 border border-slate-800 shadow-xl transition-all hover-bounce z-20"
                 aria-label="Previous image"
               >
                 <ChevronLeft size={18} className="stroke-[3]" />
@@ -233,23 +263,29 @@ export default function PostCardComponent({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
-                  setActiveImageIndex((prev) => (prev < allImageUrls.length - 1 ? prev + 1 : 0))
+                  const nextIdx = activeImageIndex < allImageUrls.length - 1 ? activeImageIndex + 1 : 0
+                  scrollToPage(nextIdx)
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/70 hover:bg-slate-950 text-white/90 hover:text-amber-400 border border-slate-800 shadow-xl transition-all hover-bounce z-10"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/75 hover:bg-slate-950 text-white/90 hover:text-amber-400 border border-slate-800 shadow-xl transition-all hover-bounce z-20"
                 aria-label="Next image"
               >
                 <ChevronRight size={18} className="stroke-[3]" />
               </button>
 
-              {/* Dot Indicators */}
-              <div className="absolute bottom-2.5 inset-x-0 flex items-center justify-center gap-1.5 z-10 pointer-events-none">
+              {/* Swipe Dots Indicator */}
+              <div className="absolute bottom-2.5 inset-x-0 flex items-center justify-center gap-1.5 z-20 pointer-events-none">
                 {allImageUrls.map((_, idx) => (
-                  <span
+                  <button
                     key={idx}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      scrollToPage(idx)
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 pointer-events-auto ${
                       idx === activeImageIndex
                         ? 'w-5 bg-amber-400 shadow-md'
-                        : 'w-1.5 bg-slate-400/60'
+                        : 'w-1.5 bg-slate-400/60 hover:bg-slate-200'
                     }`}
                   />
                 ))}

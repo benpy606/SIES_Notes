@@ -58,14 +58,8 @@ export default function SideMenu({
               <span className="font-display font-extrabold text-sm text-slate-50 line-clamp-1">
                 {profile.full_name || 'Student User'}
               </span>
-              <span className="text-[11px] font-semibold text-slate-400 flex items-center gap-1.5 mt-0.5">
-                {profile.is_admin ? (
-                  <span className="text-amber-300 bg-amber-950/90 px-2 py-0.5 rounded-full text-[10px] font-black border border-amber-500/40 flex items-center gap-1">
-                    <Shield size={10} className="text-amber-400" /> Admin
-                  </span>
-                ) : (
-                  <span className="text-slate-300 text-[10px] font-bold">BSCIT Student</span>
-                )}
+              <span className="text-[11px] font-bold text-amber-400 mt-0.5 font-mono-paper">
+                BSCIT Student
               </span>
             </div>
           </div>

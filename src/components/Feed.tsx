@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Header from './Header'
 import SubjectCarousel from './SubjectCarousel'
-import AdminBar from './AdminBar'
 import PostList from './PostList'
 import UploadModal from './UploadModal'
 import Lightbox from './Lightbox'
@@ -56,7 +55,7 @@ export default function Feed({
   subjects: Subject[]
   posts: PostWithRelations[]
 }) {
-  const [subjects, setSubjects] = useState<Subject[]>(initialSubjects)
+  const [subjects] = useState<Subject[]>(initialSubjects)
   const [selectedSubject, setSelectedSubject] = useState<string>('All')
   const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'image' | 'pdf'>('all')
 
@@ -64,10 +63,6 @@ export default function Feed({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [lightboxData, setLightboxData] = useState<{ images: string[]; initialIndex: number } | null>(null)
   const [pdfModalData, setPdfModalData] = useState<{ url: string; title: string } | null>(null)
-
-  const handleSubjectCreated = (newSubject: Subject) => {
-    setSubjects((prev) => [...prev, newSubject])
-  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex justify-center selection:bg-amber-400 selection:text-slate-950">
@@ -82,15 +77,6 @@ export default function Feed({
           selected={selectedSubject}
           onSelect={setSelectedSubject}
         />
-
-        {profile.is_admin && (
-          <AdminBar
-            subjects={subjects}
-            selectedDate={new Date().toISOString().split('T')[0]}
-            selectedSubject={selectedSubject}
-            onSubjectCreated={handleSubjectCreated}
-          />
-        )}
 
         <PostList
           posts={posts}
