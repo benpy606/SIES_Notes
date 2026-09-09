@@ -58,12 +58,12 @@ export default function Header({
 
         <button
           onClick={onOpenSideMenu}
-          className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-slate-900 dark:bg-slate-800 text-slate-100 hover:bg-slate-800 border border-slate-700 transition-all shadow-sm hover-bounce"
+          className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 transition-all shadow-sm hover-bounce"
         >
           <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 text-[10px] font-black text-slate-950 flex items-center justify-center ring-1 ring-white/40 shadow-xs">
             {initials}
           </div>
-          <span className="text-xs font-bold tracking-tight text-slate-100 max-w-[85px] truncate hidden xs:inline font-display">
+          <span className="text-xs font-bold tracking-tight text-slate-900 dark:text-slate-100 max-w-[85px] truncate hidden xs:inline font-display">
             {profile.full_name?.split(' ')[0] || 'User'}
           </span>
         </button>

@@ -65,7 +65,7 @@ export default function Feed({
   const [pdfModalData, setPdfModalData] = useState<{ url: string; title: string } | null>(null)
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex justify-center selection:bg-amber-400 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex justify-center selection:bg-amber-400 selection:text-slate-950">
       <div className="w-full max-w-md relative flex flex-col min-h-screen border-x border-slate-200/90 dark:border-slate-800/80 bg-[var(--background)] text-[var(--foreground)] shadow-2xl shadow-slate-950/40 z-10 transition-colors">
         <Header
           profile={profile}

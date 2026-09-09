@@ -160,9 +160,9 @@ export default function PostCardComponent({
           </span>
           <span
             suppressHydrationWarning
-            className="text-[11px] text-slate-300 font-bold flex items-center gap-1"
+            className="text-[11px] text-slate-600 dark:text-slate-300 font-bold flex items-center gap-1"
           >
-            <Calendar size={12} className="text-amber-400" />
+            <Calendar size={12} className="text-amber-500 dark:text-amber-400" />
             {formattedDate}
           </span>
         </div>
@@ -172,19 +172,19 @@ export default function PostCardComponent({
             <button
               onClick={() => setShowMenu(!showMenu)}
               aria-label="Options"
-              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+              className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
             >
               <MoreHorizontal size={18} />
             </button>
             {showMenu && (
-              <div className="absolute right-0 top-9 w-36 bg-slate-950 text-slate-100 border border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
+              <div className="absolute right-0 top-9 w-36 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
                 <button
                   onClick={() => {
                     setShowMenu(false)
                     handleDelete()
                   }}
                   disabled={isDeleting}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-400 hover:bg-rose-950/50 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors"
                 >
                   <Trash2 size={14} />
                   <span>Delete Post</span>
@@ -197,14 +197,14 @@ export default function PostCardComponent({
 
       {/* Note Title */}
       <div className="px-5 pb-3">
-        <h3 className="font-display font-black text-lg text-white leading-snug tracking-tight">
+        <h3 className="font-display font-black text-lg text-slate-900 dark:text-white leading-snug tracking-tight">
           {topicTitle}
         </h3>
       </div>
 
       {/* Touch Swipeable Multi-Image Media Carousel */}
       {allImageUrls.length > 0 && (
-        <div className="w-full bg-slate-900 relative border-t border-b border-slate-800 overflow-hidden group/img">
+        <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/img">
           {/* Top Multi-Page Badge Overlay */}
           {allImageUrls.length > 1 && (
             <div className="absolute top-3 right-3 z-20 bg-slate-950/85 backdrop-blur-md text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-slate-700/80 shadow-lg flex items-center gap-1.5 font-mono-paper pointer-events-none">
@@ -297,18 +297,18 @@ export default function PostCardComponent({
 
       {/* PDF Visual Preview (Picture-like container) */}
       {effectivePdfUrl && (
-        <div className="w-full bg-slate-900 relative border-t border-b border-slate-800 overflow-hidden group/pdf">
+        <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/pdf">
           <div
-            className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-center p-6 text-center"
+            className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-6 text-center"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
             {/* Styled PDF Icon Card */}
-            <div className="w-20 h-24 rounded-2xl bg-slate-900 border-2 border-amber-400/40 group-hover/pdf:border-amber-400 flex flex-col items-center justify-center gap-2 shadow-2xl transition-all group-hover/pdf:scale-105">
-              <FileText size={32} className="text-amber-400 stroke-[2.2]" />
-              <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest font-mono-paper">PDF</span>
+            <div className="w-20 h-24 rounded-2xl bg-white dark:bg-slate-900 border-2 border-amber-400/40 group-hover/pdf:border-amber-400 flex flex-col items-center justify-center gap-2 shadow-xl transition-all group-hover/pdf:scale-105">
+              <FileText size={32} className="text-amber-500 dark:text-amber-400 stroke-[2.2]" />
+              <span className="text-[9px] font-black text-amber-500 dark:text-amber-400 uppercase tracking-widest font-mono-paper">PDF</span>
             </div>
 
-            <span className="mt-3.5 text-xs font-extrabold text-slate-200 font-display line-clamp-1 max-w-[220px]">
+            <span className="mt-3.5 text-xs font-extrabold text-slate-900 dark:text-slate-200 font-display line-clamp-1 max-w-[220px]">
               {topicTitle}
             </span>
 
@@ -328,10 +328,10 @@ export default function PostCardComponent({
           </div>
 
           {/* Quick PDF Action Bar */}
-          <div className="px-4 py-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+          <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2 truncate pr-2">
-              <FileText size={18} className="text-amber-400 shrink-0 stroke-[2.2]" />
-              <span className="text-xs font-extrabold text-slate-100 truncate font-display">
+              <FileText size={18} className="text-amber-500 dark:text-amber-400 shrink-0 stroke-[2.2]" />
+              <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate font-display">
                 {topicTitle}.pdf
               </span>
             </div>
@@ -346,7 +346,7 @@ export default function PostCardComponent({
               <a
                 href={effectivePdfUrl}
                 download
-                className="py-1.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 text-[11px] font-extrabold transition-all flex items-center gap-1.5 shadow-sm hover-bounce"
+                className="py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-[11px] font-extrabold transition-all flex items-center gap-1.5 shadow-sm hover-bounce"
                 title="Download PDF"
               >
                 <Download size={12} className="stroke-[2.5]" />
@@ -360,19 +360,19 @@ export default function PostCardComponent({
       {/* Caption */}
       {post.caption && (
         <div className="px-5 pt-3 pb-3">
-          <p className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed font-medium">
+          <p className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed font-medium">
             {post.caption}
           </p>
         </div>
       )}
 
       {/* Footer */}
-      <div className="px-5 py-3.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between mt-auto transition-colors">
+      <div className="px-5 py-3.5 bg-slate-50/80 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between mt-auto transition-colors">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-slate-800 to-slate-950 text-[11px] font-black text-amber-400 flex items-center justify-center shadow-xs ring-1 ring-white/20">
+          <div className="w-7 h-7 rounded-full bg-amber-400/20 text-slate-900 dark:text-amber-400 font-mono-paper text-[11px] font-black flex items-center justify-center shadow-xs ring-1 ring-amber-500/30">
             {authorProfile?.full_name ? authorProfile.full_name.charAt(0) : <User size={12} />}
           </div>
-          <span className="text-xs font-bold text-white font-display">
+          <span className="text-xs font-bold text-slate-900 dark:text-white font-display">
             {authorProfile?.full_name || 'Anonymous Student'}
           </span>
         </div>
@@ -382,7 +382,7 @@ export default function PostCardComponent({
           className={`min-h-[38px] px-3.5 rounded-full flex items-center gap-1.5 text-xs font-black transition-all hover-bounce ${
             hasUpvoted
               ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-300 animate-heart-pulse'
-              : 'bg-slate-800 border border-slate-700 text-slate-200 hover:text-white hover:bg-slate-700 shadow-xs'
+              : 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 shadow-xs'
           }`}
         >
           <Heart size={15} className={hasUpvoted ? 'fill-white text-white' : 'text-slate-400 stroke-[2.2]'} />
