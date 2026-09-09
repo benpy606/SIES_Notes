@@ -11,43 +11,46 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const supabase = createServerClient(
-    supabaseUrl!,
-    supabaseKey!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
+  if (!supabaseUrl || !supabaseKey) {
+    return response;
+  }
+
+  try {
+    const supabase = createServerClient(
+      supabaseUrl,
+      supabaseKey,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+            response = NextResponse.next({
+              request,
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            );
+          },
         },
       },
-    },
-  );
+    );
 
-  let session = null;
-  try {
     const { data } = await supabase.auth.getSession();
-    session = data.session;
-  } catch (e) {
-    console.warn("Middleware: Failed to fetch Supabase session, proceeding as unauthenticated.", e);
-  }
+    const session = data?.session;
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup");
-  
-  if (!session && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-  
-  if (session && isAuthPage) {
-    return NextResponse.redirect(new URL("/", request.url));
+    const isAuthPage = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup");
+    
+    if (!session && !isAuthPage) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    
+    if (session && isAuthPage) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  } catch (e) {
+    console.warn("Middleware session check error caught:", e);
   }
 
   return response;
