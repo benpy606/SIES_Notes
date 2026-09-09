@@ -21,6 +21,7 @@ type PostWithRelations = {
   subject_id?: string
   title?: string
   image_url?: string | null
+  image_urls?: string[] | null
   pdf_url?: string | null
   file_type?: string
   caption?: string
@@ -73,7 +74,7 @@ export default function PostList({
   subjects: Subject[]
   selectedSubject: string
   fileTypeFilter?: 'all' | 'image' | 'pdf'
-  onImageClick: (url: string) => void
+  onImageClick: (images: string[], index: number) => void
   onPdfClick: (url: string, title: string) => void
   currentUserId: string
   isAdmin: boolean
@@ -88,7 +89,7 @@ export default function PostList({
       (subjectObj && subjects.find((s) => s.name.trim().toLowerCase() === selectedSubject.trim().toLowerCase())?.id === subjectObj.id)
 
     const isPdf = !!p.pdf_url || p.file_type === 'pdf'
-    const isImage = !!p.image_url || p.file_type === 'image' || (!isPdf && !!p.image_url)
+    const isImage = (Array.isArray(p.image_urls) && p.image_urls.length > 0) || !!p.image_url || p.file_type === 'image' || (!isPdf && !!p.image_url)
 
     let matchesType = true
     if (fileTypeFilter === 'image') matchesType = isImage

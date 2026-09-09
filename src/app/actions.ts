@@ -16,7 +16,16 @@ export async function createPost(formData: FormData) {
   const subjectId = formData.get('subjectId') as string
   const userTitle = (formData.get('title') as string) || ''
   const fileType = (formData.get('fileType') as string) || 'image' // 'image' | 'pdf'
-  const imageFile = formData.get('image') as File | null
+  
+  // Extract all attached images or single image file
+  const rawImageFiles = formData.getAll('images') as File[]
+  const singleImage = formData.get('image') as File | null
+  const imageFiles = rawImageFiles.filter((f) => f && f.size > 0).length > 0
+    ? rawImageFiles.filter((f) => f && f.size > 0)
+    : singleImage && singleImage.size > 0
+    ? [singleImage]
+    : []
+
   const pdfFile = formData.get('pdf') as File | null
 
   if (!subjectId) throw new Error('Please select a subject')
@@ -30,28 +39,42 @@ export async function createPost(formData: FormData) {
 
   const defaultTitle = userTitle.trim() || caption.trim().slice(0, 35) || (subObj ? `${subObj.name} Note` : 'Class Note')
 
+  let imageUrls: string[] = []
   let imageUrl: string | null = null
   let pdfUrl: string | null = null
 
-  if (fileType === 'image' && imageFile && imageFile.size > 0) {
-    const compressed = await compressImage(imageFile)
-    const ext = compressed.name.split('.').pop() || 'webp'
-    const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
+  if (fileType === 'image' && imageFiles.length > 0) {
+    for (const imgFile of imageFiles) {
+      try {
+        const compressed = await compressImage(imgFile)
+        const ext = compressed.name.split('.').pop() || 'webp'
+        const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
-    const { error: uploadError } = await supabase.storage
-      .from('note-images')
-      .upload(filePath, compressed, {
-        cacheControl: '3600',
-        upsert: false,
-      })
+        const { error: uploadError } = await supabase.storage
+          .from('note-images')
+          .upload(filePath, compressed, {
+            cacheControl: '3600',
+            upsert: false,
+          })
 
-    if (uploadError) throw new Error(uploadError.message || 'Failed to upload image')
+        if (uploadError) {
+          console.error('Failed uploading single image in multi-image batch:', uploadError)
+          continue
+        }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('note-images')
-      .getPublicUrl(filePath)
+        const { data: { publicUrl } } = supabase.storage
+          .from('note-images')
+          .getPublicUrl(filePath)
 
-    imageUrl = publicUrl
+        imageUrls.push(publicUrl)
+      } catch (err) {
+        console.error('Error processing image compression/upload:', err)
+      }
+    }
+
+    if (imageUrls.length > 0) {
+      imageUrl = imageUrls[0]
+    }
   } else if (fileType === 'pdf' && pdfFile && pdfFile.size > 0) {
     const filePath = `${user.id}/${Date.now()}_${pdfFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
 
@@ -89,65 +112,75 @@ export async function createPost(formData: FormData) {
   }
 
   // Attempt direct post insertion
+  const postPayload: Record<string, any> = {
+    user_id: user.id,
+    subject_id: subjectId,
+    title: defaultTitle,
+    image_url: imageUrl,
+    image_urls: imageUrls,
+    pdf_url: pdfUrl,
+    file_type: fileType,
+    caption: caption,
+  }
+
   const { error: directInsertErr } = await supabase
     .from('posts')
-    .insert({
-      user_id: user.id,
-      subject_id: subjectId,
-      title: defaultTitle,
-      image_url: imageUrl,
-      pdf_url: pdfUrl,
-      file_type: fileType,
-      caption: caption,
-    })
+    .insert(postPayload)
 
-  // If direct insertion failed (e.g. lecture_id NOT NULL or subject_id / pdf_url columns missing in remote DB)
+  // If direct insertion failed (e.g. image_urls / subject_id / pdf_url columns missing in remote DB)
   if (directInsertErr) {
-    console.warn('Direct post insert failed, creating fallback lecture slot with title:', directInsertErr.message)
+    console.warn('Direct post insert failed, attempting fallback insert:', directInsertErr.message)
 
-    const today = new Date().toISOString().split('T')[0]
-    let lectureId: string | null = null
+    // Try without image_urls if column missing
+    delete postPayload.image_urls
+    const { error: retryErr } = await supabase.from('posts').insert(postPayload)
 
-    // Create a new lecture slot with the custom title as topic
-    const { data: newLecture, error: lecErr } = await supabase
-      .from('lectures')
-      .insert({
-        subject_id: subjectId,
-        date: today,
-        lecture_number: Math.floor(Date.now() / 1000) % 10000,
-        topic: defaultTitle,
-      })
-      .select('id')
-      .single()
+    if (retryErr) {
+      console.warn('Retry without image_urls failed, creating fallback lecture slot:', retryErr.message)
+      const today = new Date().toISOString().split('T')[0]
+      let lectureId: string | null = null
 
-    if (!lecErr && newLecture) {
-      lectureId = newLecture.id
-    } else {
-      const { data: existing } = await supabase
+      // Create a new lecture slot with the custom title as topic
+      const { data: newLecture, error: lecErr } = await supabase
         .from('lectures')
+        .insert({
+          subject_id: subjectId,
+          date: today,
+          lecture_number: Math.floor(Date.now() / 1000) % 10000,
+          topic: defaultTitle,
+        })
         .select('id')
-        .eq('subject_id', subjectId)
-        .limit(1)
-        .maybeSingle()
-      if (existing) lectureId = existing.id
-    }
+        .single()
 
-    // Preserve media URL (image or PDF) in image_url so attachments are NEVER lost on legacy schema
-    const mediaUrl = imageUrl || pdfUrl
+      if (!lecErr && newLecture) {
+        lectureId = newLecture.id
+      } else {
+        const { data: existing } = await supabase
+          .from('lectures')
+          .select('id')
+          .eq('subject_id', subjectId)
+          .limit(1)
+          .maybeSingle()
+        if (existing) lectureId = existing.id
+      }
 
-    const fallbackPayload: Record<string, any> = {
-      user_id: user.id,
-      image_url: mediaUrl,
-      caption: caption,
-    }
-    if (lectureId) fallbackPayload.lecture_id = lectureId
+      // Preserve media URL (image or PDF) in image_url so attachments are NEVER lost on legacy schema
+      const mediaUrl = imageUrl || pdfUrl
 
-    const { error: fallbackErr } = await supabase
-      .from('posts')
-      .insert(fallbackPayload)
+      const fallbackPayload: Record<string, any> = {
+        user_id: user.id,
+        image_url: mediaUrl,
+        caption: caption,
+      }
+      if (lectureId) fallbackPayload.lecture_id = lectureId
 
-    if (fallbackErr) {
-      throw new Error(fallbackErr.message || directInsertErr.message || 'Failed to save note')
+      const { error: fallbackErr } = await supabase
+        .from('posts')
+        .insert(fallbackPayload)
+
+      if (fallbackErr) {
+        throw new Error(fallbackErr.message || directInsertErr.message || 'Failed to save note')
+      }
     }
   }
 
@@ -185,7 +218,7 @@ export async function deletePost(postId: string) {
 
   const { data: post } = await supabase
     .from('posts')
-    .select('id, user_id, image_url, pdf_url')
+    .select('id, user_id, image_url, image_urls, pdf_url')
     .eq('id', postId)
     .maybeSingle()
 
@@ -207,9 +240,14 @@ export async function deletePost(postId: string) {
   if (!isOwner && !isAdmin) throw new Error('Not authorized')
 
   // Remove files from Supabase storage buckets
-  if (post.image_url) {
+  if (Array.isArray(post.image_urls) && post.image_urls.length > 0) {
+    for (const url of post.image_urls) {
+      await deleteStorageFile(url, supabase)
+    }
+  } else if (post.image_url) {
     await deleteStorageFile(post.image_url, supabase)
   }
+
   if (post.pdf_url) {
     await deleteStorageFile(post.pdf_url, supabase)
   }

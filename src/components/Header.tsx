@@ -42,7 +42,9 @@ export default function Header({
           </div>
           <div>
             <h1 className="font-display text-base font-extrabold tracking-tight text-[var(--foreground)] flex items-center gap-2">
-              SIES<span className="text-orange-500 font-black">_Notes</span>
+              <span className="flex items-center">
+                SIES<span className="text-orange-500 font-black">_Notes</span>
+              </span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 font-extrabold tracking-wider border border-amber-400/30 shadow-xs uppercase">
                 BSCIT
               </span>

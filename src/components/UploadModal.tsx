@@ -3,13 +3,19 @@
 import { useState, useRef } from 'react'
 import { createPost } from '@/app/actions'
 import { compressImage } from '@/lib/compressor'
-import { X, Upload, FileText, Image as ImageIcon, Check, Sparkles } from 'lucide-react'
+import { X, Upload, FileText, Image as ImageIcon, Check, Sparkles, Plus, Layers } from 'lucide-react'
 import Image from 'next/image'
 
 type Subject = {
   id: string
   name: string
   color_code: string
+}
+
+type SelectedImage = {
+  id: string
+  file: File
+  preview: string
 }
 
 export default function UploadModal({
@@ -30,11 +36,11 @@ export default function UploadModal({
   const [title, setTitle] = useState('')
   const [caption, setCaption] = useState('')
   const [fileType, setFileType] = useState<'image' | 'pdf'>('image')
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [rawFile, setRawFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  
+  const [selectedImages, setSelectedImages] = useState<SelectedImage[]>([])
   const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
+  const [isCompressing, setIsCompressing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -43,23 +49,41 @@ export default function UploadModal({
   if (!isOpen) return null
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
-    setRawFile(file)
     setError(null)
+    setIsCompressing(true)
 
-    // Render preview immediately
-    const reader = new FileReader()
-    reader.onloadend = () => setImagePreview(reader.result as string)
-    reader.readAsDataURL(file)
+    const newItems: SelectedImage[] = []
 
-    try {
-      const compressed = await compressImage(file)
-      setImageFile(compressed)
-    } catch {
-      setImageFile(file)
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const preview = URL.createObjectURL(file)
+      newItems.push({
+        id: Math.random().toString(36).substring(7),
+        file,
+        preview,
+      })
     }
+
+    setSelectedImages((prev) => [...prev, ...newItems])
+    setIsCompressing(false)
+
+    // Reset input value so the same file can be re-selected if needed
+    if (imageInputRef.current) {
+      imageInputRef.current.value = ''
+    }
+  }
+
+  const handleRemoveImage = (id: string) => {
+    setSelectedImages((prev) => {
+      const filtered = prev.filter((img) => img.id !== id)
+      // Revoke memory URL for removed item
+      const removedItem = prev.find((img) => img.id === id)
+      if (removedItem) URL.revokeObjectURL(removedItem.preview)
+      return filtered
+    })
   }
 
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,9 +104,8 @@ export default function UploadModal({
       return
     }
 
-    const fileToUpload = imageFile || rawFile
-    if (fileType === 'image' && !fileToUpload) {
-      setError('Please attach an image photo for your note')
+    if (fileType === 'image' && selectedImages.length === 0) {
+      setError('Please attach at least one note photo')
       return
     }
 
@@ -101,8 +124,15 @@ export default function UploadModal({
       formData.set('caption', caption)
       formData.set('fileType', fileType)
 
-      if (fileType === 'image' && fileToUpload) {
-        formData.set('image', fileToUpload)
+      if (fileType === 'image') {
+        for (const item of selectedImages) {
+          try {
+            const compressed = await compressImage(item.file)
+            formData.append('images', compressed)
+          } catch {
+            formData.append('images', item.file)
+          }
+        }
       } else if (fileType === 'pdf' && pdfFile) {
         formData.set('pdf', pdfFile)
       }
@@ -111,9 +141,7 @@ export default function UploadModal({
       onClose()
       setTitle('')
       setCaption('')
-      setImageFile(null)
-      setRawFile(null)
-      setImagePreview(null)
+      setSelectedImages([])
       setPdfFile(null)
     } catch (err: any) {
       const msg =
@@ -140,7 +168,7 @@ export default function UploadModal({
             </div>
             <div>
               <h3 className="font-display font-black text-lg text-slate-50 leading-none">Upload Class Note</h3>
-              <p className="text-[11px] text-slate-400 font-bold mt-1">Share handwritten notes or PDFs with your cohort</p>
+              <p className="text-[11px] text-slate-400 font-bold mt-1">Share single or multi-page handwritten notes or PDFs</p>
             </div>
           </div>
           <button
@@ -174,7 +202,7 @@ export default function UploadModal({
                 }`}
               >
                 <ImageIcon size={14} className="stroke-[2.5]" />
-                <span>Image Note</span>
+                <span>Image Note(s)</span>
               </button>
               <button
                 type="button"
@@ -239,45 +267,75 @@ export default function UploadModal({
             />
           </div>
 
-          {/* Image Input */}
+          {/* Multi-Image Upload Area */}
           {fileType === 'image' && (
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 font-mono-paper">
-                Attach Note Image *
-              </label>
-              <div className="flex gap-3 items-center">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono-paper">
+                  Attach Note Photos *
+                </label>
+                {selectedImages.length > 0 && (
+                  <span className="text-[10px] font-bold text-amber-400 font-mono-paper flex items-center gap-1">
+                    <Layers size={11} />
+                    {selectedImages.length} {selectedImages.length === 1 ? 'Page' : 'Pages'} Selected
+                  </span>
+                )}
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                type="file"
+                ref={imageInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                multiple
+                className="hidden"
+              />
+
+              {selectedImages.length === 0 ? (
                 <button
                   type="button"
                   onClick={() => imageInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-xs font-bold text-slate-200 hover:text-white transition-all shadow-sm hover-bounce"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-amber-400/80 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-200 transition-all hover-bounce group"
                 >
-                  <Upload size={16} className="text-amber-400 stroke-[2.5]" />
-                  Choose Photo
-                </button>
-                <input
-                  type="file"
-                  ref={imageInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                {imagePreview && (
-                  <div className="w-14 h-14 rounded-2xl border-2 border-amber-400 overflow-hidden relative shadow-md">
-                    <Image src={imagePreview} className="w-full h-full object-cover" alt="Preview" unoptimized fill />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview(null)
-                        setImageFile(null)
-                        setRawFile(null)
-                      }}
-                      className="absolute -top-1 -right-1 bg-slate-950 text-white rounded-full p-1 shadow-md border border-slate-700"
-                    >
-                      <X size={10} />
-                    </button>
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Upload size={20} className="stroke-[2.5]" />
                   </div>
-                )}
-              </div>
+                  <span className="text-xs font-extrabold text-slate-200">Choose Note Images</span>
+                  <span className="text-[10px] text-slate-500 font-medium">Select single photo or multiple pages at once</span>
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  {/* Selected Thumbnail Grid */}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto p-1 bg-slate-900/40 rounded-2xl border border-slate-800/80">
+                    {selectedImages.map((img, idx) => (
+                      <div key={img.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-slate-700 shadow-md group">
+                        <Image src={img.preview} alt={`Page ${idx + 1}`} fill unoptimized className="object-cover" />
+                        <div className="absolute top-1 left-1 bg-slate-950/90 text-amber-400 text-[9px] font-black px-1.5 py-0.5 rounded-md border border-slate-800">
+                          P{idx + 1}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(img.id)}
+                          className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white rounded-full p-1 shadow-lg border border-slate-900 transition-transform hover:scale-110"
+                          title="Remove photo"
+                        >
+                          <X size={10} className="stroke-[3]" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => imageInputRef.current?.click()}
+                    className="w-full py-2.5 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-xs font-bold text-slate-300 hover:text-white flex items-center justify-center gap-2 transition-all hover-bounce"
+                  >
+                    <Plus size={14} className="text-amber-400 stroke-[3]" />
+                    <span>Add More Pages</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -322,15 +380,15 @@ export default function UploadModal({
 
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || isCompressing}
             className="w-full mt-5 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 py-3.5 text-xs font-black uppercase tracking-wider text-white transition-all disabled:opacity-50 shadow-lg shadow-orange-600/30 hover-bounce"
           >
             {saving ? (
-              <span>Uploading Note...</span>
+              <span>Compressing & Publishing...</span>
             ) : (
               <>
                 <Check size={16} className="stroke-[3]" />
-                <span>Publish Note</span>
+                <span>Publish Note ({fileType === 'image' ? `${selectedImages.length} ${selectedImages.length === 1 ? 'Page' : 'Pages'}` : 'PDF'})</span>
               </>
             )}
           </button>
@@ -339,4 +397,3 @@ export default function UploadModal({
     </div>
   )
 }
-

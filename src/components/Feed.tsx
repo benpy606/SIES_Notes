@@ -29,6 +29,7 @@ type PostWithRelations = {
   subject_id?: string
   title?: string
   image_url?: string | null
+  image_urls?: string[] | null
   pdf_url?: string | null
   file_type?: string
   caption?: string
@@ -61,7 +62,7 @@ export default function Feed({
 
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+  const [lightboxData, setLightboxData] = useState<{ images: string[]; initialIndex: number } | null>(null)
   const [pdfModalData, setPdfModalData] = useState<{ url: string; title: string } | null>(null)
 
   const handleSubjectCreated = (newSubject: Subject) => {
@@ -96,7 +97,7 @@ export default function Feed({
           subjects={subjects}
           selectedSubject={selectedSubject}
           fileTypeFilter={fileTypeFilter}
-          onImageClick={(url) => setLightboxUrl(url)}
+          onImageClick={(images, index) => setLightboxData({ images, initialIndex: index })}
           onPdfClick={(url, title) => setPdfModalData({ url, title })}
           currentUserId={profile.id}
           isAdmin={profile.is_admin}
@@ -121,7 +122,11 @@ export default function Feed({
           defaultSubject={selectedSubject !== 'All' ? selectedSubject : undefined}
         />
 
-        <Lightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+        <Lightbox
+          images={lightboxData?.images}
+          initialIndex={lightboxData?.initialIndex ?? 0}
+          onClose={() => setLightboxData(null)}
+        />
 
         <PdfViewerModal
           url={pdfModalData?.url || null}
