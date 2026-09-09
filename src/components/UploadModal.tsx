@@ -21,18 +21,19 @@ type SelectedImage = {
 export default function UploadModal({
   isOpen,
   onClose,
-  subjects,
+  subjects = [],
   defaultSubject,
 }: {
   isOpen: boolean
   onClose: () => void
-  subjects: Subject[]
+  subjects?: Subject[]
   defaultSubject?: string
 }) {
-  const initialSubjectId =
-    subjects.find((s) => s.name === defaultSubject)?.id || subjects[0]?.id || ''
+  const safeSubjects = Array.isArray(subjects) ? subjects : []
 
-  const [subjectId, setSubjectId] = useState(initialSubjectId)
+  const [subjectId, setSubjectId] = useState<string>(() => {
+    return safeSubjects.find((s) => s?.name === defaultSubject)?.id || safeSubjects[0]?.id || ''
+  })
   const [title, setTitle] = useState('')
   const [caption, setCaption] = useState('')
   const [fileType, setFileType] = useState<'image' | 'pdf'>('image')
@@ -50,6 +51,10 @@ export default function UploadModal({
   useEffect(() => {
     if (isOpen) {
       closeBtnRef.current?.focus()
+      const match = safeSubjects.find((s) => s?.name === defaultSubject)?.id || safeSubjects[0]?.id || ''
+      if (match && (!subjectId || !safeSubjects.some((s) => s.id === subjectId))) {
+        setSubjectId(match)
+      }
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -58,7 +63,7 @@ export default function UploadModal({
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, subjects, defaultSubject])
 
   if (!isOpen) return null
 
@@ -283,7 +288,7 @@ export default function UploadModal({
               required
             >
               <option value="" disabled className="bg-slate-900 text-slate-400">Select Subject...</option>
-              {subjects.map((s) => (
+              {safeSubjects.map((s) => (
                 <option key={s.id} value={s.id} className="bg-slate-900 text-slate-100">
                   {s.name}
                 </option>
