@@ -20,7 +20,6 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Sparkles,
 } from 'lucide-react'
 import { getPostSubject } from './PostList'
 
@@ -30,21 +29,30 @@ type Subject = {
   color_code: string
 }
 
+type Lecture = {
+  id?: string
+  subject_id?: string
+  date?: string
+  lecture_number?: number
+  topic?: string | null
+  subject?: Subject | Subject[]
+}
+
 type PostWithRelations = {
   id: string
   user_id: string
   subject_id?: string
   title?: string
   image_url?: string | null
-  image_urls?: string[] | string | null
+  image_urls?: string[] | null
   pdf_url?: string | null
   file_type?: string
   caption?: string
   is_pinned?: boolean
   is_verified?: boolean
   created_at: string
-  subject?: any
-  lecture?: any
+  subject?: Subject | Subject[]
+  lecture?: Lecture | Lecture[]
   profiles: {
     id: string
     full_name: string
@@ -120,9 +128,10 @@ export default function PostCardComponent({
     setIsDeleting(true)
     try {
       await deletePost(post.id)
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Delete post error:', e)
-      alert(e?.message || 'Failed to delete post. Please try again.')
+      const msg = e instanceof Error ? e.message : 'Failed to delete post. Please try again.'
+      alert(msg)
       setIsDeleting(false)
     }
   }
@@ -179,21 +188,23 @@ export default function PostCardComponent({
   // Extract all valid image URLs (handling array, comma-separated string, or single URL)
   let rawImagesList: string[] = []
   if (!isPdfFile) {
-    if (Array.isArray(post.image_urls) && post.image_urls.length > 0) {
-      rawImagesList = post.image_urls
-    } else if (typeof post.image_urls === 'string' && post.image_urls.trim().length > 0) {
+    const rawUrls = post.image_urls as unknown
+    if (Array.isArray(rawUrls) && rawUrls.length > 0) {
+      rawImagesList = rawUrls.map((u) => String(u))
+    } else if (typeof rawUrls === 'string' && rawUrls.trim().length > 0) {
       try {
-        if (post.image_urls.startsWith('[')) {
-          rawImagesList = JSON.parse(post.image_urls)
+        if (rawUrls.startsWith('[')) {
+          const parsed = JSON.parse(rawUrls)
+          if (Array.isArray(parsed)) rawImagesList = parsed.map((u) => String(u))
         } else {
-          rawImagesList = post.image_urls.split(',').map((s) => s.trim())
+          rawImagesList = rawUrls.split(',').map((s: string) => s.trim())
         }
       } catch {
-        rawImagesList = [post.image_urls]
+        rawImagesList = [rawUrls]
       }
     } else if (post.image_url && post.image_url.trim().length > 0) {
       rawImagesList = post.image_url.includes(',')
-        ? post.image_url.split(',').map((s) => s.trim())
+        ? post.image_url.split(',').map((s: string) => s.trim())
         : [post.image_url]
     }
   }

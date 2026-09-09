@@ -22,11 +22,13 @@ export default function Lightbox({
     : []
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
+  const [prevInitialIndex, setPrevInitialIndex] = useState(initialIndex)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
+  if (initialIndex !== prevInitialIndex) {
+    setPrevInitialIndex(initialIndex)
     setCurrentIndex(initialIndex)
-  }, [initialIndex, images, url])
+  }
 
   useEffect(() => {
     // Focus close button on mount

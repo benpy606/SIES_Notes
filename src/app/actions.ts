@@ -3,7 +3,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { compressImage } from '@/lib/compressor'
 
 export async function createPost(formData: FormData) {
   const cookieStore = await cookies()
@@ -40,20 +39,19 @@ export async function createPost(formData: FormData) {
 
   const defaultTitle = userTitle.trim() || caption.trim().slice(0, 35) || (subObj ? `${subObj.name} Note` : 'Class Note')
 
-  let imageUrls: string[] = []
+  const imageUrls: string[] = []
   let imageUrl: string | null = null
   let pdfUrl: string | null = null
 
   if (fileType === 'image' && imageFiles.length > 0) {
     for (const imgFile of imageFiles) {
       try {
-        const compressed = await compressImage(imgFile)
-        const ext = compressed.name.split('.').pop() || 'webp'
+        const ext = imgFile.name.split('.').pop() || 'webp'
         const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
         const { error: uploadError } = await supabase.storage
           .from('note-images')
-          .upload(filePath, compressed, {
+          .upload(filePath, imgFile, {
             cacheControl: '3600',
             upsert: false,
           })
@@ -69,7 +67,7 @@ export async function createPost(formData: FormData) {
 
         imageUrls.push(publicUrl)
       } catch (err) {
-        console.error('Error processing image compression/upload:', err)
+        console.error('Error processing image upload:', err)
       }
     }
 
@@ -90,7 +88,8 @@ export async function createPost(formData: FormData) {
       })
 
     // If 'note-pdfs' bucket not found, fallback to uploading to 'note-images' bucket
-    if (uploadError && (uploadError.message?.toLowerCase().includes('bucket not found') || (uploadError as any).statusCode === '404')) {
+    const statusErr = uploadError as { statusCode?: string } | null
+    if (uploadError && (uploadError.message?.toLowerCase().includes('bucket not found') || statusErr?.statusCode === '404')) {
       console.warn('note-pdfs bucket not found in Supabase, falling back to note-images bucket')
       bucketName = 'note-images'
       const fallbackResult = await supabase.storage
@@ -113,7 +112,7 @@ export async function createPost(formData: FormData) {
   }
 
   // Attempt direct post insertion
-  const postPayload: Record<string, any> = {
+  const postPayload: Record<string, unknown> = {
     user_id: user.id,
     subject_id: subjectId,
     title: defaultTitle,
@@ -168,7 +167,7 @@ export async function createPost(formData: FormData) {
       // Preserve media URL (image or PDF) in image_url so attachments are NEVER lost on legacy schema
       const mediaUrl = imageUrl || pdfUrl
 
-      const fallbackPayload: Record<string, any> = {
+      const fallbackPayload: Record<string, unknown> = {
         user_id: user.id,
         image_url: mediaUrl,
         caption: caption,
@@ -195,7 +194,7 @@ export async function signOut() {
   revalidatePath('/')
 }
 
-async function deleteStorageFile(publicUrlStr: string | null | undefined, supabase: any) {
+async function deleteStorageFile(publicUrlStr: string | null | undefined, supabase: ReturnType<typeof createClient>) {
   if (!publicUrlStr) return
   try {
     const url = new URL(publicUrlStr)

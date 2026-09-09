@@ -70,6 +70,7 @@ export default function Feed({
         <Header
           profile={profile}
           onOpenSideMenu={() => setIsSideMenuOpen(true)}
+          onOpenUpload={() => setIsModalOpen(true)}
         />
 
         <SubjectCarousel

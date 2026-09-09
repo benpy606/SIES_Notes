@@ -1,30 +1,39 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Sun, Moon } from 'lucide-react'
 
+const emptySubscribe = () => () => {}
+
 export default function ThemeToggle({ className = '' }: { className?: string }) {
-  const [isDark, setIsDark] = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
+
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sies_notes_theme')
+      return stored !== 'light'
+    }
+    return true
+  })
 
   useEffect(() => {
-    setMounted(true)
-    const storedTheme = localStorage.getItem('sies_notes_theme')
     const root = document.documentElement
-    if (storedTheme === 'light') {
-      setIsDark(false)
+    if (!isDark) {
       root.classList.add('light')
       root.classList.remove('dark')
       document.body.classList.add('light')
       document.body.classList.remove('dark')
     } else {
-      setIsDark(true)
       root.classList.add('dark')
       root.classList.remove('light')
       document.body.classList.add('dark')
       document.body.classList.remove('light')
     }
-  }, [])
+  }, [isDark])
 
   const toggleTheme = () => {
     const nextDark = !isDark

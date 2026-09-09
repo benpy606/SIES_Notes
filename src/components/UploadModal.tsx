@@ -43,6 +43,8 @@ export default function UploadModal({
   const [saving, setSaving] = useState(false)
   const [isCompressing, setIsCompressing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadStatusText, setUploadStatusText] = useState('')
 
   const imageInputRef = useRef<HTMLInputElement>(null)
   const pdfInputRef = useRef<HTMLInputElement>(null)
@@ -51,10 +53,6 @@ export default function UploadModal({
   useEffect(() => {
     if (isOpen) {
       closeBtnRef.current?.focus()
-      const match = safeSubjects.find((s) => s?.name === defaultSubject)?.id || safeSubjects[0]?.id || ''
-      if (match && (!subjectId || !safeSubjects.some((s) => s.id === subjectId))) {
-        setSubjectId(match)
-      }
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -63,7 +61,7 @@ export default function UploadModal({
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose, subjects, defaultSubject])
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
@@ -132,12 +130,10 @@ export default function UploadModal({
     setError(null)
   }
 
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [uploadStatusText, setUploadStatusText] = useState('')
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!subjectId) {
+    const activeSubjectId = subjectId || safeSubjects[0]?.id || ''
+    if (!activeSubjectId) {
       setError('Please select a subject')
       return
     }
@@ -159,7 +155,7 @@ export default function UploadModal({
 
     try {
       const formData = new FormData()
-      formData.set('subjectId', subjectId)
+      formData.set('subjectId', activeSubjectId)
       formData.set('title', title || 'Class Note')
       formData.set('caption', caption)
       formData.set('fileType', fileType)
@@ -192,13 +188,14 @@ export default function UploadModal({
       setCaption('')
       setSelectedImages([])
       setPdfFile(null)
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errObj = err as Record<string, unknown>
       const msg =
-        err?.message ||
+        (errObj?.message as string) ||
         (typeof err === 'string'
           ? err
           : typeof err === 'object' && err !== null
-          ? err.error_description || err.msg || JSON.stringify(err)
+          ? (errObj?.error_description as string) || (errObj?.msg as string) || JSON.stringify(err)
           : 'Upload failed')
       setError(msg)
     } finally {
@@ -212,9 +209,13 @@ export default function UploadModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="upload-modal-title"
+      onClick={onClose}
       className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
     >
-      <div className="w-full max-w-lg bg-slate-950 text-slate-100 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-800 animate-pop-in">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg bg-slate-950 text-slate-100 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-800 animate-pop-in"
+      >
         {/* Header */}
         <div className="flex justify-between items-center pb-3.5 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -341,6 +342,7 @@ export default function UploadModal({
 
               {/* Hidden file input */}
               <input
+                id="image-file-input"
                 type="file"
                 ref={imageInputRef}
                 onChange={handleImageChange}
@@ -350,17 +352,16 @@ export default function UploadModal({
               />
 
               {selectedImages.length === 0 ? (
-                <button
-                  type="button"
-                  onClick={() => imageInputRef.current?.click()}
-                  className="w-full py-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-amber-400/80 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-200 transition-all hover-bounce group"
+                <label
+                  htmlFor="image-file-input"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-amber-400/80 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-200 transition-all hover-bounce group cursor-pointer"
                 >
                   <div className="w-10 h-10 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload size={20} className="stroke-[2.5]" />
                   </div>
                   <span className="text-xs font-extrabold text-slate-200">Choose Note Images</span>
                   <span className="text-[10px] text-slate-500 font-medium">Select up to 5 photos per note post</span>
-                </button>
+                </label>
               ) : (
                 <div className="space-y-3">
                   {/* Selected Thumbnail Grid */}
@@ -383,19 +384,15 @@ export default function UploadModal({
                     ))}
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={selectedImages.length >= MAX_IMAGES}
-                    onClick={() => imageInputRef.current?.click()}
-                    className={`w-full py-2.5 rounded-xl border border-dashed text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                      selectedImages.length >= MAX_IMAGES
-                        ? 'border-slate-800 bg-slate-900/40 text-slate-500 cursor-not-allowed'
-                        : 'border-slate-700 hover:border-amber-400 bg-slate-900 text-slate-300 hover:text-white hover-bounce'
-                    }`}
-                  >
-                    <Plus size={14} className={selectedImages.length >= MAX_IMAGES ? 'text-slate-600' : 'text-amber-400 stroke-[3]'} />
-                    <span>{selectedImages.length >= MAX_IMAGES ? `Max ${MAX_IMAGES} Photos Reached` : 'Add More Pages'}</span>
-                  </button>
+                  {selectedImages.length < MAX_IMAGES && (
+                    <label
+                      htmlFor="image-file-input"
+                      className="w-full py-2.5 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-slate-300 hover:text-white hover-bounce text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                      <Plus size={14} className="text-amber-400 stroke-[3]" />
+                      <span>Add More Pages</span>
+                    </label>
+                  )}
                 </div>
               )}
             </div>
@@ -408,21 +405,21 @@ export default function UploadModal({
                 Attach PDF Document *
               </label>
               <div className="flex gap-3 items-center">
-                <button
-                  type="button"
-                  onClick={() => pdfInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-xs font-bold text-slate-200 hover:text-white transition-all shadow-sm hover-bounce"
-                >
-                  <Upload size={16} className="text-amber-400 stroke-[2.5]" />
-                  Select PDF
-                </button>
                 <input
+                  id="pdf-file-input"
                   type="file"
                   ref={pdfInputRef}
                   onChange={handlePdfChange}
                   accept="application/pdf"
                   className="hidden"
                 />
+                <label
+                  htmlFor="pdf-file-input"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-xs font-bold text-slate-200 hover:text-white transition-all shadow-sm hover-bounce cursor-pointer"
+                >
+                  <Upload size={16} className="text-amber-400 stroke-[2.5]" />
+                  Select PDF
+                </label>
                 {pdfFile && (
                   <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-amber-400/50 text-amber-300 text-xs font-bold">
                     <FileText size={16} className="text-amber-400 shrink-0 stroke-[2.5]" />

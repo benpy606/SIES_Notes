@@ -12,11 +12,16 @@ export default function PdfViewerModal({
   title?: string
   onClose: () => void
 }) {
+  const [prevUrl, setPrevUrl] = useState(url)
   const [isReady, setIsReady] = useState(false)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
+  if (url !== prevUrl) {
+    setPrevUrl(url)
     setIsReady(false)
+  }
+
+  useEffect(() => {
     if (url) {
       closeBtnRef.current?.focus()
       const timer = setTimeout(() => setIsReady(true), 1500)

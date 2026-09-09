@@ -15,6 +15,13 @@ type Profile = {
   is_admin: boolean
 }
 
+type LectureRelation = {
+  id?: string
+  subject_id?: string
+  subject?: Subject | Subject[]
+  topic?: string | null
+}
+
 type PostWithRelations = {
   id: string
   user_id: string
@@ -27,12 +34,12 @@ type PostWithRelations = {
   caption?: string
   created_at: string
   subject?: Subject | Subject[]
-  lecture?: any
+  lecture?: LectureRelation | LectureRelation[]
   profiles: Profile
   upvotes: { count: number }[]
 }
 
-export function getPostSubject(p: any, subjects: Subject[]): Subject | undefined {
+export function getPostSubject(p: Partial<PostWithRelations> | undefined, subjects: Subject[]): Subject | undefined {
   if (!p) return undefined
 
   // 1. Direct subject relation object or array

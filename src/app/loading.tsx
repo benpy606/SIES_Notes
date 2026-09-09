@@ -1,4 +1,4 @@
-import { Sparkles, Layers } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 
 export default function Loading() {
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles, Menu } from 'lucide-react'
+import { Sparkles, Menu, Plus } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 type Profile = {
@@ -12,9 +12,11 @@ type Profile = {
 export default function Header({
   profile,
   onOpenSideMenu,
+  onOpenUpload,
 }: {
   profile: Profile
   onOpenSideMenu?: () => void
+  onOpenUpload?: () => void
 }) {
   const initials =
     profile.full_name
@@ -54,6 +56,17 @@ export default function Header({
       </div>
 
       <div className="flex items-center gap-2">
+        {onOpenUpload && (
+          <button
+            onClick={onOpenUpload}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 hover-bounce transition-all active:scale-95 cursor-pointer"
+            aria-label="Upload new note"
+          >
+            <Plus size={15} className="stroke-[3]" />
+            <span className="hidden xs:inline uppercase text-[10px] tracking-wider font-mono-paper">Upload</span>
+          </button>
+        )}
+
         <ThemeToggle />
 
         <button
@@ -71,4 +84,5 @@ export default function Header({
     </header>
   )
 }
+
 

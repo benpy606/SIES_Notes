@@ -9,6 +9,32 @@ export const metadata: Metadata = {
   description: 'Classroom notes social tracker for BScIT, SIES Nerul.',
 }
 
+type SubjectModel = {
+  id: string
+  name: string
+  color_code: string
+}
+
+type PostModel = {
+  id: string
+  user_id: string
+  subject_id?: string
+  lecture_id?: string
+  title?: string
+  image_url?: string | null
+  image_urls?: string[] | null
+  pdf_url?: string | null
+  file_type?: string
+  caption?: string
+  created_at: string
+  subject?: SubjectModel
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  lecture?: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  profiles: any
+  upvotes: { count: number }[]
+}
+
 export default async function Home() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
@@ -26,8 +52,8 @@ export default async function Home() {
   }
 
   let profile = null
-  let subjects: any[] = []
-  let posts: any[] = []
+  let subjects: SubjectModel[] = []
+  let posts: PostModel[] = []
 
   try {
     // 1. Fetch current profile
@@ -43,10 +69,10 @@ export default async function Home() {
       .from('subjects')
       .select('*')
       .order('name')
-    subjects = subs || []
+    subjects = (subs as SubjectModel[]) || []
 
     // 3. Fetch raw posts with nested objects or simple select
-    let rawPosts: any[] = []
+    let rawPosts: PostModel[] = []
     
     // Try nested query first
     const { data: pst, error: postErr } = await supabase
@@ -60,7 +86,7 @@ export default async function Home() {
       .order('created_at', { ascending: false })
 
     if (pst && !postErr) {
-      rawPosts = pst
+      rawPosts = pst as PostModel[]
     } else {
       console.warn('Nested post query warning:', postErr?.message)
       // Fallback: simple post select if foreign key relations fail
@@ -68,12 +94,12 @@ export default async function Home() {
         .from('posts')
         .select('*')
         .order('created_at', { ascending: false })
-      rawPosts = simplePosts || []
+      rawPosts = (simplePosts as PostModel[]) || []
     }
 
     // 4. Enrich author profiles for all fetched posts
     const userIds = Array.from(new Set(rawPosts.map((p) => p.user_id).filter(Boolean)))
-    let profilesMap: Record<string, any> = {}
+    let profilesMap: Record<string, { id: string; full_name: string; is_admin: boolean }> = {}
     if (userIds.length > 0) {
       const { data: profs } = await supabase
         .from('profiles')
@@ -88,8 +114,8 @@ export default async function Home() {
     const subjectsMap = Object.fromEntries(subjects.map((s) => [s.id, s]))
 
     // 6. Enrich lectures if needed
-    const lectureIds = Array.from(new Set(rawPosts.map((p) => p.lecture_id).filter(Boolean)))
-    let lecturesMap: Record<string, any> = {}
+    const lectureIds = Array.from(new Set(rawPosts.map((p) => p.lecture_id).filter(Boolean))) as string[]
+    let lecturesMap: Record<string, { id: string; subject_id?: string; subject?: SubjectModel }> = {}
     if (lectureIds.length > 0) {
       const { data: lecs } = await supabase
         .from('lectures')
@@ -108,14 +134,18 @@ export default async function Home() {
         is_admin: false,
       }
 
+      const lecId = p.lecture_id
+      const subId = p.subject_id
+      const lecObj = p.lecture as { subject?: SubjectModel; subject_id?: string } | undefined
+
       const subjectObj =
         p.subject ||
-        subjectsMap[p.subject_id] ||
-        p.lecture?.subject ||
-        lecturesMap[p.lecture_id]?.subject ||
-        (p.lecture_id ? subjectsMap[lecturesMap[p.lecture_id]?.subject_id] : null)
+        (subId ? subjectsMap[subId] : null) ||
+        lecObj?.subject ||
+        (lecId ? lecturesMap[lecId]?.subject : null) ||
+        (lecId && lecturesMap[lecId]?.subject_id ? subjectsMap[lecturesMap[lecId].subject_id!] : null)
 
-      const lectureObj = p.lecture || lecturesMap[p.lecture_id]
+      const lectureObj = p.lecture || (lecId ? lecturesMap[lecId] : null)
 
       return {
         ...p,
@@ -123,7 +153,7 @@ export default async function Home() {
         subject: subjectObj,
         lecture: lectureObj,
         upvotes: p.upvotes || [{ count: 0 }],
-      }
+      } as PostModel
     })
   } catch (err) {
     console.error('Error assembling feed posts:', err)
