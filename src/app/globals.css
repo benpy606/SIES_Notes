@@ -41,6 +41,12 @@ html.light, body.light, html:not(.dark), body:not(.dark) {
   --gradient-glow: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), transparent 70%);
 }
 
+html, body {
+  touch-action: manipulation;
+  overscroll-behavior-y: none;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);

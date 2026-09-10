@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { X, ExternalLink, Download, FileText, RefreshCw } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { X, ExternalLink, Download, FileText } from 'lucide-react'
+import PdfCanvasPreview from './PdfCanvasPreview'
 
 export default function PdfViewerModal({
   url,
@@ -12,20 +13,11 @@ export default function PdfViewerModal({
   title?: string
   onClose: () => void
 }) {
-  const [prevUrl, setPrevUrl] = useState(url)
-  const [isReady, setIsReady] = useState(false)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
-
-  if (url !== prevUrl) {
-    setPrevUrl(url)
-    setIsReady(false)
-  }
 
   useEffect(() => {
     if (url) {
       closeBtnRef.current?.focus()
-      const timer = setTimeout(() => setIsReady(true), 1200)
-      return () => clearTimeout(timer)
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,7 +50,7 @@ export default function PdfViewerModal({
               {title || 'PDF Note Document'}
             </span>
             <span className="text-[10px] font-mono-paper uppercase tracking-wider text-amber-400 font-bold">
-              PDF Document Viewer
+              PDF Interactive Reader
             </span>
           </div>
         </div>
@@ -70,7 +62,7 @@ export default function PdfViewerModal({
             target="_blank"
             rel="noopener noreferrer"
             className="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors shadow-md hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
-            title="Open in Browser Mobile PDF Reader"
+            title="Open Original PDF File"
           >
             <ExternalLink size={14} className="stroke-[2.5]" />
             <span className="font-display">Open PDF</span>
@@ -99,28 +91,7 @@ export default function PdfViewerModal({
 
       {/* Frame Container */}
       <div className="w-full max-w-5xl mx-auto flex-1 bg-slate-950 rounded-b-3xl overflow-hidden shadow-2xl relative flex flex-col border border-slate-800">
-        {!isReady && (
-          <div className="absolute inset-0 z-10 bg-slate-950/95 flex flex-col items-center justify-center gap-3 text-slate-300 p-4 text-center">
-            <RefreshCw size={28} className="animate-spin text-amber-400 stroke-[2.5]" />
-            <span className="text-xs font-bold font-mono-paper text-amber-400 uppercase tracking-widest">
-              Loading PDF Document...
-            </span>
-          </div>
-        )}
-
-        <object
-          data={url}
-          type="application/pdf"
-          className="w-full h-full border-0 bg-slate-900"
-          onLoad={() => setIsReady(true)}
-        >
-          <iframe
-            src={url}
-            className="w-full h-full border-0 bg-slate-900"
-            title="PDF Document Viewer"
-            onLoad={() => setIsReady(true)}
-          />
-        </object>
+        <PdfCanvasPreview url={url} title={title} mode="interactive" className="w-full h-full" />
       </div>
     </div>
   )

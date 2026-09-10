@@ -22,6 +22,7 @@ import {
   Check,
 } from 'lucide-react'
 import { getPostSubject } from './PostList'
+import PdfCanvasPreview from './PdfCanvasPreview'
 
 type Subject = {
   id: string
@@ -494,24 +495,13 @@ export default function PostCardComponent({
             className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-center"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
-            {/* Embedded Live PDF Document Preview */}
-            <iframe
-              src={`${effectivePdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+            {/* Live Canvas PDF First-Page Document Preview */}
+            <PdfCanvasPreview
+              url={effectivePdfUrl}
               title={topicTitle}
-              className="w-full h-full border-0 pointer-events-none select-none"
-              loading="lazy"
+              mode="thumbnail"
+              className="pointer-events-none select-none"
             />
-
-            {/* Fallback Icon Card if frame background */}
-            <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center p-6 text-center bg-slate-950">
-              <div className="w-16 h-20 rounded-2xl bg-slate-900 border-2 border-amber-400/40 flex flex-col items-center justify-center gap-1.5 shadow-xl">
-                <FileText size={28} className="text-amber-400 stroke-[2.2]" />
-                <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest font-mono-paper">PDF</span>
-              </div>
-              <span className="mt-2 text-xs font-extrabold text-slate-200 font-display line-clamp-1 max-w-[200px]">
-                {topicTitle}
-              </span>
-            </div>
 
             {/* Top Right Format Badge */}
             <div className="absolute top-3 right-3 z-10 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-950/30 font-mono-paper pointer-events-none">

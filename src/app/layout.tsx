@@ -18,9 +18,13 @@ export const metadata: Metadata = {
   authors: [{ name: "@benpy606" }],
 };
 
-export const viewport = {
+import type { Viewport } from "next";
+
+export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
