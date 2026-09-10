@@ -494,9 +494,9 @@ export default function PostCardComponent({
             className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-center"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
-            {/* Embedded Live PDF Document Preview with Google Docs Embed for Cross-Platform & Mobile Compatibility */}
+            {/* Embedded Live PDF Document Preview */}
             <iframe
-              src={`https://docs.google.com/gview?url=${encodeURIComponent(effectivePdfUrl)}&embedded=true`}
+              src={`${effectivePdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
               title={topicTitle}
               className="w-full h-full border-0 pointer-events-none select-none"
               loading="lazy"
@@ -517,14 +517,6 @@ export default function PostCardComponent({
             <div className="absolute top-3 right-3 z-10 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-950/30 font-mono-paper pointer-events-none">
               <FileText size={12} className="stroke-[2.5]" />
               <span>PDF Document</span>
-            </div>
-
-            {/* Touch / Tap to Expand Overlay */}
-            <div className="absolute inset-0 bg-slate-950/40 group-hover/pdf:bg-slate-950/60 transition-all flex items-center justify-center backdrop-blur-[2px]">
-              <span className="text-xs font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-300 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 transition-transform hover-bounce">
-                <ExternalLink size={14} className="stroke-[2.5]" />
-                Tap to Open PDF Reader
-              </span>
             </div>
           </div>
 
