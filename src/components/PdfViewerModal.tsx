@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from 'react'
 import { X, ExternalLink, Download, FileText } from 'lucide-react'
-import PdfCanvasPreview from './PdfCanvasPreview'
+import dynamic from 'next/dynamic'
+
+const PdfCanvasPreview = dynamic(() => import('./PdfCanvasPreview'), {
+  ssr: false,
+})
 
 export default function PdfViewerModal({
   url,

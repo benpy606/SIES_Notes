@@ -22,7 +22,17 @@ import {
   Check,
 } from 'lucide-react'
 import { getPostSubject } from './PostList'
-import PdfCanvasPreview from './PdfCanvasPreview'
+import dynamic from 'next/dynamic'
+
+const PdfCanvasPreview = dynamic(() => import('./PdfCanvasPreview'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-slate-950 text-slate-200">
+      <FileText size={28} className="text-amber-400 stroke-[2.2] animate-pulse" />
+      <span className="mt-2 text-[10px] font-mono-paper text-amber-400 uppercase tracking-widest">Loading PDF Preview...</span>
+    </div>
+  ),
+})
 
 type Subject = {
   id: string

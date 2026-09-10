@@ -29,6 +29,10 @@ const WORKER_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.w
 let scriptLoadedPromise: Promise<void> | null = null
 
 function loadPdfJsScript(): Promise<void> {
+  if (typeof window === 'undefined') {
+    return Promise.resolve()
+  }
+
   if (window.pdfjsLib) {
     return Promise.resolve()
   }
@@ -38,11 +42,16 @@ function loadPdfJsScript(): Promise<void> {
   }
 
   scriptLoadedPromise = new Promise((resolve, reject) => {
+    if (typeof document === 'undefined') {
+      resolve()
+      return
+    }
+
     const script = document.createElement('script')
     script.src = PDFJS_CDN
     script.async = true
     script.onload = () => {
-      if (window.pdfjsLib) {
+      if (typeof window !== 'undefined' && window.pdfjsLib) {
         window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_CDN
       }
       resolve()
@@ -124,7 +133,7 @@ export default function PdfCanvasPreview({
         const renderScale = 2.0
         const viewport = page.getViewport({ scale: renderScale })
         
-        const outputScale = window.devicePixelRatio || 1
+        const outputScale = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1
         canvas.width = Math.floor(viewport.width * outputScale)
         canvas.height = Math.floor(viewport.height * outputScale)
 
