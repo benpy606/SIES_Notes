@@ -494,9 +494,9 @@ export default function PostCardComponent({
             className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-center"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
-            {/* Embedded Live PDF First-Page Document Preview */}
+            {/* Embedded Live PDF Document Preview with Google Docs Embed for Cross-Platform & Mobile Compatibility */}
             <iframe
-              src={`${effectivePdfUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+              src={`https://docs.google.com/gview?url=${encodeURIComponent(effectivePdfUrl)}&embedded=true`}
               title={topicTitle}
               className="w-full h-full border-0 pointer-events-none select-none"
               loading="lazy"
@@ -519,9 +519,9 @@ export default function PostCardComponent({
               <span>PDF Document</span>
             </div>
 
-            {/* Hover / Tap to Expand Overlay */}
-            <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover/pdf:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
-              <span className="text-xs font-extrabold text-white bg-slate-950/90 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 border border-white/20">
+            {/* Touch / Tap to Expand Overlay */}
+            <div className="absolute inset-0 bg-slate-950/40 group-hover/pdf:bg-slate-950/60 transition-all flex items-center justify-center backdrop-blur-[2px]">
+              <span className="text-xs font-extrabold text-slate-950 bg-amber-400 hover:bg-amber-300 px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 transition-transform hover-bounce">
                 <ExternalLink size={14} className="stroke-[2.5]" />
                 Tap to Open PDF Reader
               </span>
@@ -538,6 +538,7 @@ export default function PostCardComponent({
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
+                type="button"
                 onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
                 className="py-1.5 px-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-extrabold flex items-center gap-1.5 shadow-sm transition-all hover-bounce"
               >
@@ -546,7 +547,7 @@ export default function PostCardComponent({
               </button>
               <a
                 href={effectivePdfUrl}
-                download
+                download={`${topicTitle.replace(/[^a-zA-Z0-9.-]/g, '_')}.pdf`}
                 className="py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-[11px] font-extrabold transition-all flex items-center gap-1.5 shadow-sm hover-bounce"
                 title="Download PDF"
               >
