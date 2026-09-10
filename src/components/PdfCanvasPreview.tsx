@@ -120,20 +120,25 @@ export default function PdfCanvasPreview({
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        // Base render scale: crisp high-resolution baseline (1.5x)
-        const renderScale = 1.5
+        // Base render scale: crisp high-resolution baseline (2.0x)
+        const renderScale = 2.0
         const viewport = page.getViewport({ scale: renderScale })
         
         const outputScale = window.devicePixelRatio || 1
         canvas.width = Math.floor(viewport.width * outputScale)
         canvas.height = Math.floor(viewport.height * outputScale)
 
-        // Ensure canvas CSS sizing preserves natural aspect ratio with max bounds
-        canvas.style.width = 'auto'
-        canvas.style.height = 'auto'
-        canvas.style.maxWidth = '100%'
-        canvas.style.maxHeight = '100%'
-        canvas.style.objectFit = 'contain'
+        // Fit width by default for large, clear readability on mobile screens
+        if (mode === 'thumbnail') {
+          canvas.style.width = '100%'
+          canvas.style.height = 'auto'
+          canvas.style.objectFit = 'cover'
+          canvas.style.objectPosition = 'top'
+        } else {
+          canvas.style.width = '100%'
+          canvas.style.maxWidth = '100%'
+          canvas.style.height = 'auto'
+        }
 
         ctx.scale(outputScale, outputScale)
 

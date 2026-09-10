@@ -492,7 +492,7 @@ export default function PostCardComponent({
       {effectivePdfUrl && (
         <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/pdf">
           <div
-            className="w-full aspect-[4/3] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-center"
+            className="w-full aspect-[4/5] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-start"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
             {/* Live Canvas PDF First-Page Document Preview */}
