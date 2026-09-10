@@ -71,30 +71,34 @@ export default async function Home() {
       .order('name')
     subjects = (subs as SubjectModel[]) || []
 
-    // 3. Fetch raw posts with nested objects or simple select
-    let rawPosts: PostModel[] = []
-    
-    // Try nested query first
-    const { data: pst, error: postErr } = await supabase
+    // 3. Fetch posts cleanly without failing foreign key nested queries
+    const { data: simplePosts, error: postErr } = await supabase
       .from('posts')
-      .select(`
-        *,
-        subject:subjects(*),
-        lecture:lectures(*, subject:subjects(*)),
-        upvotes:upvotes(count)
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
 
-    if (pst && !postErr) {
-      rawPosts = pst as PostModel[]
-    } else {
-      console.warn('Nested post query warning:', postErr?.message)
-      // Fallback: simple post select if foreign key relations fail
-      const { data: simplePosts } = await supabase
-        .from('posts')
-        .select('*')
-        .order('created_at', { ascending: false })
-      rawPosts = (simplePosts as PostModel[]) || []
+    if (postErr) {
+      console.error('Error fetching posts:', postErr.message)
+    }
+
+    const rawPosts: PostModel[] = (simplePosts as PostModel[]) || []
+
+    // 3b. Fetch upvotes count map
+    const postIds = rawPosts.map((p) => p.id).filter(Boolean)
+    const upvotesCountMap: Record<string, number> = {}
+    if (postIds.length > 0) {
+      const { data: upvoteData } = await supabase
+        .from('upvotes')
+        .select('post_id')
+        .in('post_id', postIds)
+
+      if (upvoteData) {
+        upvoteData.forEach((uv) => {
+          if (uv.post_id) {
+            upvotesCountMap[uv.post_id] = (upvotesCountMap[uv.post_id] || 0) + 1
+          }
+        })
+      }
     }
 
     // 4. Enrich author profiles for all fetched posts
@@ -152,7 +156,7 @@ export default async function Home() {
         profiles: author,
         subject: subjectObj,
         lecture: lectureObj,
-        upvotes: p.upvotes || [{ count: 0 }],
+        upvotes: [{ count: upvotesCountMap[p.id] ?? 0 }],
       } as PostModel
     })
   } catch (err) {
