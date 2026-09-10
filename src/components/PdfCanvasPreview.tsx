@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { FileText, RefreshCw, AlertCircle, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { FileText, RefreshCw, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw, Move } from 'lucide-react'
 
 // Declare pdfjsLib on window
 declare global {
@@ -26,7 +26,6 @@ declare global {
 const PDFJS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
 const WORKER_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
 
-let isScriptLoading = false
 let scriptLoadedPromise: Promise<void> | null = null
 
 function loadPdfJsScript(): Promise<void> {
@@ -39,7 +38,6 @@ function loadPdfJsScript(): Promise<void> {
   }
 
   scriptLoadedPromise = new Promise((resolve, reject) => {
-    isScriptLoading = true
     const script = document.createElement('script')
     script.src = PDFJS_CDN
     script.async = true
@@ -47,11 +45,9 @@ function loadPdfJsScript(): Promise<void> {
       if (window.pdfjsLib) {
         window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_CDN
       }
-      isScriptLoading = false
       resolve()
     }
     script.onerror = (err) => {
-      isScriptLoading = false
       scriptLoadedPromise = null
       reject(err)
     }
@@ -76,10 +72,22 @@ export default function PdfCanvasPreview({
   const [error, setError] = useState(false)
   const [numPages, setNumPages] = useState<number>(1)
   const [currentPage, setCurrentPage] = useState<number>(1)
-  const [scale, setScale] = useState<number>(mode === 'thumbnail' ? 1.0 : 1.2)
+  
+  // Free Zoom & Pan States for Interactive Viewer
+  const [zoom, setZoom] = useState<number>(1)
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
 
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+  const pinchDistRef = useRef<number | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const renderTaskRef = useRef<Promise<void> | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // Reset pan and zoom on page change
+  const resetView = useCallback(() => {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -97,10 +105,7 @@ export default function PdfCanvasPreview({
           throw new Error('PDF.js failed to load')
         }
 
-        const loadingTask = window.pdfjsLib.getDocument({
-          url,
-        })
-
+        const loadingTask = window.pdfjsLib.getDocument({ url })
         const pdf = await loadingTask.promise
         if (!isMounted) return
 
@@ -115,14 +120,20 @@ export default function PdfCanvasPreview({
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        const viewport = page.getViewport({ scale })
+        // Base render scale: crisp high-resolution baseline (1.5x)
+        const renderScale = 1.5
+        const viewport = page.getViewport({ scale: renderScale })
         
-        // Handle high DPI displays for crisp text
         const outputScale = window.devicePixelRatio || 1
         canvas.width = Math.floor(viewport.width * outputScale)
         canvas.height = Math.floor(viewport.height * outputScale)
-        canvas.style.width = `${Math.floor(viewport.width)}px`
-        canvas.style.height = `${Math.floor(viewport.height)}px`
+
+        // Ensure canvas CSS sizing preserves natural aspect ratio with max bounds
+        canvas.style.width = 'auto'
+        canvas.style.height = 'auto'
+        canvas.style.maxWidth = '100%'
+        canvas.style.maxHeight = '100%'
+        canvas.style.objectFit = 'contain'
 
         ctx.scale(outputScale, outputScale)
 
@@ -135,7 +146,7 @@ export default function PdfCanvasPreview({
           setLoading(false)
         }
       } catch (err) {
-        console.warn('PDF.js canvas rendering fallback notice:', err)
+        console.warn('PDF.js canvas rendering notice:', err)
         if (isMounted) {
           setError(true)
           setLoading(false)
@@ -148,7 +159,69 @@ export default function PdfCanvasPreview({
     return () => {
       isMounted = false
     }
-  }, [url, currentPage, scale])
+  }, [url, currentPage])
+
+  // Mouse & Touch Pan / Zoom Handlers for Interactive Reader Mode
+  const handlePointerDown = (clientX: number, clientY: number) => {
+    if (mode !== 'interactive') return
+    setIsDragging(true)
+    dragStartRef.current = {
+      x: clientX - pan.x,
+      y: clientY - pan.y,
+    }
+  }
+
+  const handlePointerMove = (clientX: number, clientY: number) => {
+    if (mode !== 'interactive' || !isDragging) return
+    setPan({
+      x: clientX - dragStartRef.current.x,
+      y: clientY - dragStartRef.current.y,
+    })
+  }
+
+  const handlePointerUp = () => {
+    setIsDragging(false)
+    pinchDistRef.current = null
+  }
+
+  // Touch specific multi-touch pinch zoom
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (mode !== 'interactive') return
+    if (e.touches.length === 1) {
+      handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
+    } else if (e.touches.length === 2) {
+      setIsDragging(false)
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      pinchDistRef.current = dist
+    }
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (mode !== 'interactive') return
+    if (e.touches.length === 1 && isDragging) {
+      handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+    } else if (e.touches.length === 2 && pinchDistRef.current !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      const delta = dist - pinchDistRef.current
+      pinchDistRef.current = dist
+
+      setZoom((prev) => Math.min(4.0, Math.max(0.6, prev + delta * 0.008)))
+    }
+  }
+
+  // Wheel zoom handler
+  const handleWheel = (e: React.WheelEvent) => {
+    if (mode !== 'interactive') return
+    e.stopPropagation()
+    const zoomDelta = e.deltaY < 0 ? 0.15 : -0.15
+    setZoom((prev) => Math.min(4.0, Math.max(0.6, prev + zoomDelta)))
+  }
 
   if (error) {
     return (
@@ -165,9 +238,22 @@ export default function PdfCanvasPreview({
   }
 
   return (
-    <div className={`relative w-full h-full flex flex-col items-center justify-center bg-slate-950 overflow-auto ${className}`}>
+    <div
+      ref={containerRef}
+      onWheel={handleWheel}
+      onMouseDown={(e) => handlePointerDown(e.clientX, e.clientY)}
+      onMouseMove={(e) => handlePointerMove(e.clientX, e.clientY)}
+      onMouseUp={handlePointerUp}
+      onMouseLeave={handlePointerUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handlePointerUp}
+      className={`relative w-full h-full flex flex-col items-center justify-center bg-slate-950 overflow-hidden select-none ${
+        mode === 'interactive' ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''
+      } ${className}`}
+    >
       {loading && (
-        <div className="absolute inset-0 z-10 bg-slate-950/90 flex flex-col items-center justify-center gap-2.5 text-slate-300">
+        <div className="absolute inset-0 z-20 bg-slate-950/90 flex flex-col items-center justify-center gap-2.5 text-slate-300 pointer-events-none">
           <RefreshCw size={24} className="animate-spin text-amber-400 stroke-[2.5]" />
           <span className="text-[10px] font-bold font-mono-paper text-amber-400 uppercase tracking-widest">
             Rendering PDF Canvas...
@@ -175,60 +261,98 @@ export default function PdfCanvasPreview({
         </div>
       )}
 
-      {/* Render Canvas */}
-      <div className="flex-1 flex items-center justify-center p-2 w-full overflow-auto">
-        <canvas ref={canvasRef} className="max-w-full shadow-2xl rounded-lg border border-slate-800 bg-white" />
+      {/* Free Zoomable & Movable Canvas Stage */}
+      <div
+        className="flex-1 w-full h-full flex items-center justify-center p-2 transition-transform duration-75 ease-out"
+        style={{
+          transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${zoom})`,
+          transformOrigin: 'center center',
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          className="shadow-2xl rounded-lg border border-slate-800 bg-white"
+        />
       </div>
 
-      {/* Interactive Toolbar for Modal Reader Mode */}
+      {/* Interactive Controls Bar for Reader Mode */}
       {mode === 'interactive' && numPages > 0 && (
-        <div className="sticky bottom-3 z-20 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-800 flex items-center gap-3 shadow-2xl text-slate-200">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="sticky bottom-3 z-30 bg-slate-900/90 backdrop-blur-md px-3 sm:px-4 py-2 rounded-2xl border border-slate-800 flex items-center gap-2 sm:gap-3 shadow-2xl text-slate-200"
+        >
           {/* Page Prev/Next */}
           <button
             type="button"
             disabled={currentPage <= 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-amber-400"
+            onClick={() => {
+              setCurrentPage((p) => Math.max(1, p - 1))
+              resetView()
+            }}
+            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-amber-400 transition-colors"
             title="Previous Page"
           >
             <ChevronLeft size={16} className="stroke-[3]" />
           </button>
           
-          <span className="text-xs font-mono-paper font-bold text-slate-100">
-            Page {currentPage} of {numPages}
+          <span className="text-[11px] sm:text-xs font-mono-paper font-bold text-slate-100 whitespace-nowrap">
+            {currentPage} / {numPages}
           </span>
 
           <button
             type="button"
             disabled={currentPage >= numPages}
-            onClick={() => setCurrentPage((p) => Math.min(numPages, p + 1))}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-amber-400"
+            onClick={() => {
+              setCurrentPage((p) => Math.min(numPages, p + 1))
+              resetView()
+            }}
+            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-amber-400 transition-colors"
             title="Next Page"
           >
             <ChevronRight size={16} className="stroke-[3]" />
           </button>
 
-          <div className="h-4 w-px bg-slate-800 mx-1" />
+          <div className="h-4 w-px bg-slate-800 my-auto" />
 
           {/* Zoom controls */}
           <button
             type="button"
-            onClick={() => setScale((s) => Math.max(0.6, s - 0.2))}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
+            onClick={() => setZoom((s) => Math.max(0.6, s - 0.25))}
+            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
             title="Zoom Out"
           >
             <ZoomOut size={15} />
           </button>
+
+          <span className="text-[10px] font-mono-paper font-bold text-amber-400 min-w-[35px] text-center">
+            {Math.round(zoom * 100)}%
+          </span>
+
           <button
             type="button"
-            onClick={() => setScale((s) => Math.min(2.5, s + 0.2))}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300"
+            onClick={() => setZoom((s) => Math.min(4.0, s + 0.25))}
+            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
             title="Zoom In"
           >
             <ZoomIn size={15} />
           </button>
+
+          <button
+            type="button"
+            onClick={resetView}
+            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition-colors"
+            title="Reset Pan & Zoom"
+          >
+            <RotateCcw size={15} />
+          </button>
+
+          <div className="hidden xs:flex items-center gap-1 text-[10px] font-mono-paper text-slate-400 pl-1 border-l border-slate-800">
+            <Move size={12} className="text-amber-400" />
+            <span>Drag to Pan</span>
+          </div>
         </div>
       )}
     </div>
   )
 }
+
