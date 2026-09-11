@@ -33,8 +33,16 @@ export default function UploadModal({
   const safeSubjects = Array.isArray(subjects) ? subjects : []
 
   const [subjectId, setSubjectId] = useState<string>(() => {
-    return safeSubjects.find((s) => s?.name === defaultSubject)?.id || safeSubjects[0]?.id || ''
+    return safeSubjects.find((s) => s?.name === defaultSubject)?.id || ''
   })
+
+  function formatFileSize(bytes: number): string {
+    if (!bytes || bytes <= 0) return '0 B'
+    const k = 1024
+    const sizes = ['B', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+  }
   const [title, setTitle] = useState('')
   const [caption, setCaption] = useState('')
   const [fileType, setFileType] = useState<'image' | 'pdf'>('image')
@@ -353,7 +361,7 @@ export default function UploadModal({
               className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-3 text-xs font-bold text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent shadow-inner"
               required
             >
-              <option value="" disabled className="bg-slate-900 text-slate-400">Select Subject...</option>
+              <option value="" disabled className="bg-slate-900 text-slate-400">Select a subject...</option>
               {safeSubjects.map((s) => (
                 <option key={s.id} value={s.id} className="bg-slate-900 text-slate-100">
                   {s.name}
@@ -469,36 +477,60 @@ export default function UploadModal({
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 font-mono-paper">
                 Attach PDF Document *
               </label>
-              <div className="flex gap-3 items-center">
-                <input
-                  id="pdf-file-input"
-                  type="file"
-                  ref={pdfInputRef}
-                  onChange={handlePdfChange}
-                  accept="application/pdf"
-                  className="hidden"
-                />
+
+              <input
+                id="pdf-file-input"
+                type="file"
+                ref={pdfInputRef}
+                onChange={handlePdfChange}
+                accept="application/pdf"
+                className="hidden"
+              />
+
+              {!pdfFile ? (
                 <label
                   htmlFor="pdf-file-input"
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-xs font-bold text-slate-200 hover:text-white transition-all shadow-sm hover-bounce cursor-pointer"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-amber-400/80 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-200 transition-all hover-bounce group cursor-pointer"
                 >
-                  <Upload size={16} className="text-amber-400 stroke-[2.5]" />
-                  Select PDF
-                </label>
-                {pdfFile && (
-                  <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 border border-amber-400/50 text-amber-300 text-xs font-bold">
-                    <FileText size={16} className="text-amber-400 shrink-0 stroke-[2.5]" />
-                    <span className="max-w-[130px] truncate font-mono-paper">{pdfFile.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => setPdfFile(null)}
-                      className="text-slate-400 hover:text-rose-400 p-0.5"
-                    >
-                      <X size={14} />
-                    </button>
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FileText size={20} className="stroke-[2.5]" />
                   </div>
-                )}
-              </div>
+                  <span className="text-xs font-extrabold text-slate-200">Choose PDF Document</span>
+                  <span className="text-[10px] text-slate-500 font-medium">Upload handwritten or typed PDF notes</span>
+                </label>
+              ) : (
+                <div className="p-4 rounded-2xl bg-slate-900 border border-amber-400/50 text-slate-100 flex items-center justify-between gap-3 shadow-lg animate-pop-in">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                      <FileText size={20} className="stroke-[2.5]" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-extrabold text-white truncate max-w-[170px] sm:max-w-[230px] font-display">
+                        {pdfFile.name}
+                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-mono-paper font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                          {formatFileSize(pdfFile.size)}
+                        </span>
+                        <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono-paper">
+                          <Check size={11} className="stroke-[3]" /> Ready to Publish
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPdfFile(null)
+                      if (pdfInputRef.current) pdfInputRef.current.value = ''
+                    }}
+                    className="p-2 rounded-xl bg-slate-950 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/50 transition-colors shrink-0"
+                    title="Remove PDF"
+                  >
+                    <X size={14} className="stroke-[2.5]" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
