@@ -151,6 +151,9 @@ export async function createPost(formData: FormData) {
     }
   }
 
+  // Resolve or create a lecture slot for subject to satisfy legacy NOT NULL lecture_id constraint and store topic title
+  const fallbackLectureId = await getOrCreateLectureId(supabase, subjectId, defaultTitle)
+
   // Attempt direct post insertion with all fields
   const postPayload: Record<string, unknown> = {
     user_id: user.id,
@@ -162,54 +165,62 @@ export async function createPost(formData: FormData) {
     file_type: fileType,
     caption: caption,
   }
+  if (fallbackLectureId) {
+    postPayload.lecture_id = fallbackLectureId
+  }
 
   let { error: insertErr } = await supabase
     .from('posts')
     .insert(postPayload)
 
-  // If insertion failed (e.g. lecture_id NOT NULL constraint or missing columns in remote DB)
+  // If insertion failed (e.g. missing optional columns in remote DB schema)
   if (insertErr) {
-    console.warn('Direct post insert notice, attempting schema fallback & lecture_id resolution:', insertErr.message)
+    console.warn('Direct post insert notice, attempting schema fallback:', insertErr.message)
 
-    // Resolve or create a lecture slot for subject to satisfy legacy NOT NULL lecture_id constraint
-    const fallbackLectureId = await getOrCreateLectureId(supabase, subjectId, defaultTitle)
-    if (fallbackLectureId) {
-      postPayload.lecture_id = fallbackLectureId
+    // Fallback 1: Try without image_urls if array column is absent
+    const sanitizedPayload: Record<string, unknown> = {
+      user_id: user.id,
+      subject_id: subjectId,
+      title: defaultTitle,
+      image_url: imageUrl || pdfUrl,
+      pdf_url: pdfUrl,
+      file_type: fileType,
+      caption: caption,
     }
+    if (fallbackLectureId) sanitizedPayload.lecture_id = fallbackLectureId
 
-    const retryResult = await supabase.from('posts').insert(postPayload)
-    insertErr = retryResult.error
+    const sanitizedResult = await supabase.from('posts').insert(sanitizedPayload)
+    insertErr = sanitizedResult.error
 
     if (insertErr) {
-      console.warn('Retry with lecture_id failed, trying sanitized payload:', insertErr.message)
+      console.warn('Sanitized insert failed, trying legacy schema insert with title:', insertErr.message)
 
-      // Try without image_urls if array column is absent
-      const sanitizedPayload: Record<string, unknown> = {
+      // Fallback 2: Try with title, subject_id, image_url, caption (omitting pdf_url and file_type columns)
+      const legacyPayloadWithTitle: Record<string, unknown> = {
         user_id: user.id,
         subject_id: subjectId,
         title: defaultTitle,
         image_url: imageUrl || pdfUrl,
-        pdf_url: pdfUrl,
-        file_type: fileType,
         caption: caption,
       }
-      if (fallbackLectureId) sanitizedPayload.lecture_id = fallbackLectureId
+      if (fallbackLectureId) legacyPayloadWithTitle.lecture_id = fallbackLectureId
 
-      const sanitizedResult = await supabase.from('posts').insert(sanitizedPayload)
-      insertErr = sanitizedResult.error
+      const legacyTitleResult = await supabase.from('posts').insert(legacyPayloadWithTitle)
+      insertErr = legacyTitleResult.error
 
       if (insertErr) {
-        console.warn('Sanitized insert failed, trying minimal legacy schema insert:', insertErr.message)
+        console.warn('Legacy insert with title failed, trying minimal legacy schema insert:', insertErr.message)
 
-        const legacyPayload: Record<string, unknown> = {
+        // Fallback 3: Minimal insert (user_id, image_url, caption, lecture_id)
+        const minimalPayload: Record<string, unknown> = {
           user_id: user.id,
           image_url: imageUrl || pdfUrl,
           caption: caption,
         }
-        if (fallbackLectureId) legacyPayload.lecture_id = fallbackLectureId
+        if (fallbackLectureId) minimalPayload.lecture_id = fallbackLectureId
 
-        const legacyResult = await supabase.from('posts').insert(legacyPayload)
-        insertErr = legacyResult.error
+        const minimalResult = await supabase.from('posts').insert(minimalPayload)
+        insertErr = minimalResult.error
 
         if (insertErr) {
           throw new Error(insertErr.message || 'Failed to save note post to database')
@@ -229,28 +240,36 @@ async function getOrCreateLectureId(
 ): Promise<string | null> {
   if (!subjectId) return null
   try {
-    const { data: existing } = await supabase
-      .from('lectures')
-      .select('id')
-      .eq('subject_id', subjectId)
-      .limit(1)
-      .maybeSingle()
-
-    if (existing?.id) return existing.id
-
     const today = new Date().toISOString().split('T')[0]
-    const { data: newLec } = await supabase
+    const topicText = title.trim() || 'Class Note'
+
+    // Create a new lecture entry for this upload so the topic title is explicitly preserved
+    const { data: newLec, error: insertErr } = await supabase
       .from('lectures')
       .insert({
         subject_id: subjectId,
         date: today,
         lecture_number: Math.floor(Date.now() / 1000) % 10000,
-        topic: title || 'Class Note',
+        topic: topicText,
       })
       .select('id')
       .single()
 
-    if (newLec?.id) return newLec.id
+    if (newLec?.id && !insertErr) return newLec.id
+
+    // Fallback: If insert fails (e.g. constraint violation), get existing lecture for subject and update topic
+    const { data: existing } = await supabase
+      .from('lectures')
+      .select('id')
+      .eq('subject_id', subjectId)
+      .order('id', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (existing?.id) {
+      await supabase.from('lectures').update({ topic: topicText }).eq('id', existing.id)
+      return existing.id
+    }
   } catch (err) {
     console.warn('Notice resolving fallback lecture_id:', err)
   }

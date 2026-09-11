@@ -176,8 +176,8 @@ export default function UploadModal({
 
       const formData = new FormData()
       formData.set('subjectId', activeSubjectId)
-      formData.set('title', title || 'Class Note')
-      formData.set('caption', caption)
+      formData.set('title', title.trim())
+      formData.set('caption', caption.trim())
       formData.set('fileType', fileType)
 
       let uploadedPdfUrl: string | null = null
