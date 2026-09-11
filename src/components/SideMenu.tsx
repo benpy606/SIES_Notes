@@ -209,8 +209,13 @@ export default function SideMenu({
               <span>Sign Out</span>
             </button>
           </form>
-          <div className="text-center pt-1 border-t border-slate-200 dark:border-slate-800/60">
-            <span className="text-[10px] font-mono-paper font-bold text-slate-500 dark:text-slate-400">
+          <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-800/60 space-y-1">
+            <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 dark:text-slate-400">
+              <a href="/privacy" className="hover:text-amber-500 transition-colors font-medium">Privacy</a>
+              <span>•</span>
+              <a href="/terms" className="hover:text-amber-500 transition-colors font-medium">Terms</a>
+            </div>
+            <span className="text-[10px] font-mono-paper font-bold text-slate-500 dark:text-slate-400 block">
               Built with ⚡ by <span className="text-amber-600 dark:text-amber-400 font-extrabold">@benpy606</span>
             </span>
           </div>

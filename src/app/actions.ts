@@ -11,10 +11,18 @@ export async function createPost(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const caption = (formData.get('caption') as string) || ''
+  // Anti-spam Honeypot Check: Discard bot submissions
+  const honeypot = (formData.get('website') as string) || (formData.get('botField') as string) || ''
+  if (honeypot.trim().length > 0) {
+    console.warn('Spam submission intercepted via honeypot field.')
+    return { success: true }
+  }
+
+  const caption = ((formData.get('caption') as string) || '').slice(0, 1000)
   const subjectId = formData.get('subjectId') as string
-  const userTitle = (formData.get('title') as string) || ''
+  const userTitle = ((formData.get('title') as string) || '').slice(0, 120)
   const fileType = (formData.get('fileType') as string) || 'image' // 'image' | 'pdf'
+
   
   // Extract all attached images or single image file (capped at max 5 photos)
   const rawImageFiles = formData.getAll('images') as File[]

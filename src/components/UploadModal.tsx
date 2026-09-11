@@ -324,6 +324,12 @@ export default function UploadModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Honeypot Fields for Spam Protection */}
+          <div className="hidden aria-hidden=true" tabIndex={-1}>
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" defaultValue="" />
+            <input type="text" name="botField" tabIndex={-1} autoComplete="off" defaultValue="" />
+          </div>
+
           {/* Format Selector */}
           <div>
             <label className="block text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 font-mono-paper">
