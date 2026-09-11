@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import { redirect } from 'next/navigation'
 
 export async function login(formData: FormData) {
   const cookieStore = await cookies()
@@ -16,10 +16,10 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    return NextResponse.redirect(new URL('/login?error=' + encodeURIComponent(error.message), process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
+    redirect('/login?error=' + encodeURIComponent(error.message))
   }
 
-  return NextResponse.redirect(new URL('/', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
+  redirect('/')
 }
 
 export async function signup(formData: FormData) {
@@ -40,8 +40,8 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    return NextResponse.redirect(new URL('/login?error=' + encodeURIComponent(error.message), process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
+    redirect('/login?error=' + encodeURIComponent(error.message))
   }
 
-  return NextResponse.redirect(new URL('/login?message=Account+registered+successfully!+You+can+now+sign+in.', process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'))
+  redirect('/login?message=Account+registered+successfully!+You+can+now+sign+in.')
 }

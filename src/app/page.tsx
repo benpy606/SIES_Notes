@@ -39,15 +39,20 @@ export default async function Home() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
-  let session = null
+  let userId: string | null = null
+  let userEmail: string | null = null
+
   try {
-    const { data } = await supabase.auth.getSession()
-    session = data.session
-  } catch {
-    // Supabase unreachable or invalid
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      userId = user.id
+      userEmail = user.email || null
+    }
+  } catch (authErr) {
+    console.warn('Auth user check notice:', authErr)
   }
 
-  if (!session) {
+  if (!userId) {
     redirect('/login')
   }
 
@@ -60,7 +65,7 @@ export default async function Home() {
     const { data: prof } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', session.user.id)
+      .eq('id', userId)
       .maybeSingle()
     profile = prof
 
@@ -167,8 +172,8 @@ export default async function Home() {
     <Feed
       profile={
         profile || {
-          id: session.user.id,
-          full_name: session.user.email || 'Student',
+          id: userId!,
+          full_name: userEmail || 'Student',
           is_admin: false,
         }
       }
