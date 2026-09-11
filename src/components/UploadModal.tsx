@@ -189,14 +189,20 @@ export default function UploadModal({
       setSelectedImages([])
       setPdfFile(null)
     } catch (err: unknown) {
+      console.error('Upload error:', err)
       const errObj = err as Record<string, unknown>
-      const msg =
+      let msg =
         (errObj?.message as string) ||
         (typeof err === 'string'
           ? err
           : typeof err === 'object' && err !== null
           ? (errObj?.error_description as string) || (errObj?.msg as string) || JSON.stringify(err)
           : 'Upload failed')
+
+      if (msg.includes('Server Components render') || msg.includes('omitted in production')) {
+        msg = 'Server upload failed. Please check file size or network connection.'
+      }
+
       setError(msg)
     } finally {
       setSaving(false)

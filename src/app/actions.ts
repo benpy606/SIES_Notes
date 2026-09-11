@@ -49,11 +49,16 @@ export async function createPost(formData: FormData) {
         const ext = imgFile.name.split('.').pop() || 'webp'
         const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
+        // Convert File to Buffer for Node server environment compatibility
+        const arrayBuffer = await imgFile.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
         const { error: uploadError } = await supabase.storage
           .from('note-images')
-          .upload(filePath, imgFile, {
+          .upload(filePath, buffer, {
             cacheControl: '3600',
             upsert: false,
+            contentType: imgFile.type || 'image/webp',
           })
 
         if (uploadError) {
@@ -75,26 +80,32 @@ export async function createPost(formData: FormData) {
       imageUrl = imageUrls.join(',')
     }
   } else if (fileType === 'pdf' && pdfFile && pdfFile.size > 0) {
-    const filePath = `${user.id}/${Date.now()}_${pdfFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const cleanFileName = (pdfFile.name || 'document.pdf').replace(/[^a-zA-Z0-9.-]/g, '_')
+    const filePath = `${user.id}/${Date.now()}_${cleanFileName}`
+
+    // Convert PDF File to Buffer for Node server environment compatibility
+    const pdfArrayBuffer = await pdfFile.arrayBuffer()
+    const pdfBuffer = Buffer.from(pdfArrayBuffer)
 
     // Try uploading to 'note-pdfs' bucket first
     let bucketName = 'note-pdfs'
-    let { error: uploadError } = await supabase.storage
+    let uploadResult = await supabase.storage
       .from(bucketName)
-      .upload(filePath, pdfFile, {
+      .upload(filePath, pdfBuffer, {
         cacheControl: '3600',
         upsert: false,
         contentType: 'application/pdf',
       })
 
-    // If 'note-pdfs' bucket not found, fallback to uploading to 'note-images' bucket
-    const statusErr = uploadError as { statusCode?: string } | null
-    if (uploadError && (uploadError.message?.toLowerCase().includes('bucket not found') || statusErr?.statusCode === '404')) {
-      console.warn('note-pdfs bucket not found in Supabase, falling back to note-images bucket')
+    let uploadError = uploadResult.error
+
+    // If 'note-pdfs' bucket failed for any reason (e.g. bucket doesn't exist, 404, RLS issue), fallback to 'note-images'
+    if (uploadError) {
+      console.warn('Uploading to note-pdfs bucket failed, attempting fallback to note-images bucket:', uploadError.message)
       bucketName = 'note-images'
       const fallbackResult = await supabase.storage
         .from(bucketName)
-        .upload(filePath, pdfFile, {
+        .upload(filePath, pdfBuffer, {
           cacheControl: '3600',
           upsert: false,
           contentType: 'application/pdf',
@@ -102,7 +113,10 @@ export async function createPost(formData: FormData) {
       uploadError = fallbackResult.error
     }
 
-    if (uploadError) throw new Error(uploadError.message || 'Failed to upload PDF file')
+    if (uploadError) {
+      console.error('Failed uploading PDF to storage:', uploadError)
+      throw new Error(`Failed to upload PDF file: ${uploadError.message || 'Storage error'}`)
+    }
 
     const { data: { publicUrl } } = supabase.storage
       .from(bucketName)
@@ -111,12 +125,12 @@ export async function createPost(formData: FormData) {
     pdfUrl = publicUrl
   }
 
-  // Attempt direct post insertion
+  // Attempt direct post insertion with all fields
   const postPayload: Record<string, unknown> = {
     user_id: user.id,
     subject_id: subjectId,
     title: defaultTitle,
-    image_url: imageUrl,
+    image_url: imageUrl || pdfUrl, // Fallback image_url ensures PDFs render on legacy DB schemas
     image_urls: imageUrls,
     pdf_url: pdfUrl,
     file_type: fileType,
@@ -127,64 +141,41 @@ export async function createPost(formData: FormData) {
     .from('posts')
     .insert(postPayload)
 
-  // If direct insertion failed (e.g. image_urls / subject_id / pdf_url columns missing in remote DB)
   if (directInsertErr) {
     console.warn('Direct post insert failed, attempting fallback insert:', directInsertErr.message)
 
-    // Try without image_urls if column missing
-    delete postPayload.image_urls
-    const { error: retryErr } = await supabase.from('posts').insert(postPayload)
+    // Try without image_urls if array column missing
+    const sanitizedPayload: Record<string, unknown> = {
+      user_id: user.id,
+      subject_id: subjectId,
+      title: defaultTitle,
+      image_url: imageUrl || pdfUrl,
+      pdf_url: pdfUrl,
+      file_type: fileType,
+      caption: caption,
+    }
+
+    const { error: retryErr } = await supabase.from('posts').insert(sanitizedPayload)
 
     if (retryErr) {
-      console.warn('Retry without image_urls failed, creating fallback lecture slot:', retryErr.message)
-      const today = new Date().toISOString().split('T')[0]
-      let lectureId: string | null = null
-
-      // Create a new lecture slot with the custom title as topic
-      const { data: newLecture, error: lecErr } = await supabase
-        .from('lectures')
-        .insert({
-          subject_id: subjectId,
-          date: today,
-          lecture_number: Math.floor(Date.now() / 1000) % 10000,
-          topic: defaultTitle,
-        })
-        .select('id')
-        .single()
-
-      if (!lecErr && newLecture) {
-        lectureId = newLecture.id
-      } else {
-        const { data: existing } = await supabase
-          .from('lectures')
-          .select('id')
-          .eq('subject_id', subjectId)
-          .limit(1)
-          .maybeSingle()
-        if (existing) lectureId = existing.id
-      }
-
-      // Preserve media URL (image or PDF) in image_url so attachments are NEVER lost on legacy schema
-      const mediaUrl = imageUrl || pdfUrl
-
-      const fallbackPayload: Record<string, unknown> = {
+      console.warn('Retry without image_urls failed, attempting minimal legacy insert:', retryErr.message)
+      
+      const legacyPayload: Record<string, unknown> = {
         user_id: user.id,
-        image_url: mediaUrl,
+        image_url: imageUrl || pdfUrl,
         caption: caption,
       }
-      if (lectureId) fallbackPayload.lecture_id = lectureId
 
-      const { error: fallbackErr } = await supabase
-        .from('posts')
-        .insert(fallbackPayload)
+      const { error: legacyErr } = await supabase.from('posts').insert(legacyPayload)
 
-      if (fallbackErr) {
-        throw new Error(fallbackErr.message || directInsertErr.message || 'Failed to save note')
+      if (legacyErr) {
+        throw new Error(legacyErr.message || retryErr.message || directInsertErr.message || 'Failed to save note post')
       }
     }
   }
 
   revalidatePath('/')
+  return { success: true }
 }
 
 export async function signOut() {

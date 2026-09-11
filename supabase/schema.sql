@@ -50,6 +50,14 @@ ALTER TABLE public.lectures ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.upvotes ENABLE ROW LEVEL SECURITY;
 
+-- If legacy public.notes table exists in your Supabase DB, enable RLS & secure policies
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'notes') THEN
+    EXECUTE 'ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;';
+  END IF;
+END $$;
+
 -- Helper to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -137,6 +145,23 @@ CREATE POLICY "Users can insert own upvotes"
 DROP POLICY IF EXISTS "Users can delete own upvotes" ON public.upvotes;
 CREATE POLICY "Users can delete own upvotes"
   ON public.upvotes FOR DELETE USING (auth.uid() = user_id);
+
+-- Legacy public.notes policies cleanup (fixes Supabase Security Advisor warnings)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'notes') THEN
+    EXECUTE 'DROP POLICY IF EXISTS "Allow public delete" ON public.notes;';
+    EXECUTE 'DROP POLICY IF EXISTS "Allow public insert" ON public.notes;';
+    EXECUTE 'DROP POLICY IF EXISTS "Allow public read" ON public.notes;';
+    EXECUTE 'DROP POLICY IF EXISTS "Allow public update" ON public.notes;';
+    
+    EXECUTE 'DROP POLICY IF EXISTS "Authenticated users can read notes" ON public.notes;';
+    EXECUTE 'CREATE POLICY "Authenticated users can read notes" ON public.notes FOR SELECT USING (auth.role() = ''authenticated'');';
+    
+    EXECUTE 'DROP POLICY IF EXISTS "Authenticated users can insert notes" ON public.notes;';
+    EXECUTE 'CREATE POLICY "Authenticated users can insert notes" ON public.notes FOR INSERT WITH CHECK (auth.role() = ''authenticated'');';
+  END IF;
+END $$;
 
 -- Seed initial subjects for BScIT
 INSERT INTO public.subjects (name, color_code) VALUES
