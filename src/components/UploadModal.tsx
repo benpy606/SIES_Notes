@@ -461,8 +461,9 @@ export default function UploadModal({
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(img.id)}
-                          className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white rounded-full p-1 shadow-lg border border-slate-900 transition-transform hover:scale-110"
+                          className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white rounded-full p-1 shadow-lg border border-slate-900 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                           title="Remove photo"
+                          aria-label={`Remove photo ${idx + 1}`}
                         >
                           <X size={10} className="stroke-[3]" />
                         </button>
@@ -537,8 +538,9 @@ export default function UploadModal({
                       setPdfFile(null)
                       if (pdfInputRef.current) pdfInputRef.current.value = ''
                     }}
-                    className="p-2 rounded-xl bg-slate-950 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/50 transition-colors shrink-0"
+                    className="p-2 rounded-xl bg-slate-950 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/50 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                     title="Remove PDF"
+                    aria-label="Remove PDF"
                   >
                     <X size={14} className="stroke-[2.5]" />
                   </button>
@@ -548,12 +550,19 @@ export default function UploadModal({
           )}
 
           {saving && (
-            <div className="space-y-2 pt-2 animate-fade-in">
+            <div className="space-y-2 pt-2 animate-fade-in" aria-live="polite">
               <div className="flex justify-between items-center text-[10px] font-mono-paper font-black">
                 <span className="text-amber-400 uppercase tracking-widest">{uploadStatusText}</span>
                 <span className="text-slate-300">{uploadProgress}%</span>
               </div>
-              <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner">
+              <div
+                className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner"
+                role="progressbar"
+                aria-valuenow={uploadProgress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Upload progress"
+              >
                 <div
                   className="h-full bg-gradient-to-r from-orange-600 via-amber-400 to-emerald-400 rounded-full transition-all duration-300 progress-animated-striped shadow-md"
                   style={{ width: `${uploadProgress}%` }}
