@@ -36,6 +36,9 @@ CREATE TABLE IF NOT EXISTS public.posts (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Ensure lecture_id allows NULL values for direct subject notes
+ALTER TABLE public.posts ALTER COLUMN lecture_id DROP NOT NULL;
+
 CREATE TABLE IF NOT EXISTS public.upvotes (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

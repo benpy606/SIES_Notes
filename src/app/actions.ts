@@ -155,45 +155,98 @@ export async function createPost(formData: FormData) {
     caption: caption,
   }
 
-  const { error: directInsertErr } = await supabase
+  let { error: insertErr } = await supabase
     .from('posts')
     .insert(postPayload)
 
-  if (directInsertErr) {
-    console.warn('Direct post insert failed, attempting fallback insert:', directInsertErr.message)
+  // If insertion failed (e.g. lecture_id NOT NULL constraint or missing columns in remote DB)
+  if (insertErr) {
+    console.warn('Direct post insert notice, attempting schema fallback & lecture_id resolution:', insertErr.message)
 
-    // Try without image_urls if array column missing
-    const sanitizedPayload: Record<string, unknown> = {
-      user_id: user.id,
-      subject_id: subjectId,
-      title: defaultTitle,
-      image_url: imageUrl || pdfUrl,
-      pdf_url: pdfUrl,
-      file_type: fileType,
-      caption: caption,
+    // Resolve or create a lecture slot for subject to satisfy legacy NOT NULL lecture_id constraint
+    const fallbackLectureId = await getOrCreateLectureId(supabase, subjectId, defaultTitle)
+    if (fallbackLectureId) {
+      postPayload.lecture_id = fallbackLectureId
     }
 
-    const { error: retryErr } = await supabase.from('posts').insert(sanitizedPayload)
+    const retryResult = await supabase.from('posts').insert(postPayload)
+    insertErr = retryResult.error
 
-    if (retryErr) {
-      console.warn('Retry without image_urls failed, attempting minimal legacy insert:', retryErr.message)
-      
-      const legacyPayload: Record<string, unknown> = {
+    if (insertErr) {
+      console.warn('Retry with lecture_id failed, trying sanitized payload:', insertErr.message)
+
+      // Try without image_urls if array column is absent
+      const sanitizedPayload: Record<string, unknown> = {
         user_id: user.id,
+        subject_id: subjectId,
+        title: defaultTitle,
         image_url: imageUrl || pdfUrl,
+        pdf_url: pdfUrl,
+        file_type: fileType,
         caption: caption,
       }
+      if (fallbackLectureId) sanitizedPayload.lecture_id = fallbackLectureId
 
-      const { error: legacyErr } = await supabase.from('posts').insert(legacyPayload)
+      const sanitizedResult = await supabase.from('posts').insert(sanitizedPayload)
+      insertErr = sanitizedResult.error
 
-      if (legacyErr) {
-        throw new Error(legacyErr.message || retryErr.message || directInsertErr.message || 'Failed to save note post')
+      if (insertErr) {
+        console.warn('Sanitized insert failed, trying minimal legacy schema insert:', insertErr.message)
+
+        const legacyPayload: Record<string, unknown> = {
+          user_id: user.id,
+          image_url: imageUrl || pdfUrl,
+          caption: caption,
+        }
+        if (fallbackLectureId) legacyPayload.lecture_id = fallbackLectureId
+
+        const legacyResult = await supabase.from('posts').insert(legacyPayload)
+        insertErr = legacyResult.error
+
+        if (insertErr) {
+          throw new Error(insertErr.message || 'Failed to save note post to database')
+        }
       }
     }
   }
 
   revalidatePath('/')
   return { success: true }
+}
+
+async function getOrCreateLectureId(
+  supabase: ReturnType<typeof createClient>,
+  subjectId: string,
+  title: string
+): Promise<string | null> {
+  if (!subjectId) return null
+  try {
+    const { data: existing } = await supabase
+      .from('lectures')
+      .select('id')
+      .eq('subject_id', subjectId)
+      .limit(1)
+      .maybeSingle()
+
+    if (existing?.id) return existing.id
+
+    const today = new Date().toISOString().split('T')[0]
+    const { data: newLec } = await supabase
+      .from('lectures')
+      .insert({
+        subject_id: subjectId,
+        date: today,
+        lecture_number: Math.floor(Date.now() / 1000) % 10000,
+        topic: title || 'Class Note',
+      })
+      .select('id')
+      .single()
+
+    if (newLec?.id) return newLec.id
+  } catch (err) {
+    console.warn('Notice resolving fallback lecture_id:', err)
+  }
+  return null
 }
 
 export async function signOut() {
