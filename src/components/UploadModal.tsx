@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createPost } from '@/app/actions'
+import { createClient } from '@/utils/supabase/client'
 import { compressImage } from '@/lib/compressor'
 import { X, Upload, FileText, Image as ImageIcon, Check, Sparkles, Plus, Layers } from 'lucide-react'
 import Image from 'next/image'
@@ -49,6 +50,8 @@ export default function UploadModal({
   const imageInputRef = useRef<HTMLInputElement>(null)
   const pdfInputRef = useRef<HTMLInputElement>(null)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
+
+  const supabase = createClient()
 
   useEffect(() => {
     if (isOpen) {
@@ -150,33 +153,89 @@ export default function UploadModal({
 
     setSaving(true)
     setError(null)
-    setUploadProgress(15)
-    setUploadStatusText('Preparing note files...')
+    setUploadProgress(10)
+    setUploadStatusText('Preparing note upload...')
 
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('You must be signed in to upload notes.')
+
       const formData = new FormData()
       formData.set('subjectId', activeSubjectId)
       formData.set('title', title || 'Class Note')
       formData.set('caption', caption)
       formData.set('fileType', fileType)
 
-      if (fileType === 'image') {
+      let uploadedPdfUrl: string | null = null
+      const uploadedImageUrls: string[] = []
+
+      // 1. Direct Client-to-Supabase Storage Upload for PDF
+      if (fileType === 'pdf' && pdfFile) {
+        setUploadStatusText('Uploading PDF document...')
+        setUploadProgress(35)
+
+        const cleanFileName = (pdfFile.name || 'document.pdf').replace(/[^a-zA-Z0-9.-]/g, '_')
+        const filePath = `${user.id}/${Date.now()}_${cleanFileName}`
+
+        // Try uploading to 'note-pdfs' bucket
+        let bucketUsed = 'note-pdfs'
+        let { error: storageErr } = await supabase.storage
+          .from(bucketUsed)
+          .upload(filePath, pdfFile, { cacheControl: '3600', upsert: false, contentType: 'application/pdf' })
+
+        if (storageErr) {
+          console.warn('note-pdfs bucket failed, falling back to note-images:', storageErr.message)
+          bucketUsed = 'note-images'
+          const fallbackRes = await supabase.storage
+            .from(bucketUsed)
+            .upload(filePath, pdfFile, { cacheControl: '3600', upsert: false, contentType: 'application/pdf' })
+          storageErr = fallbackRes.error
+        }
+
+        if (storageErr) {
+          throw new Error(`Storage Upload Failed: ${storageErr.message || 'Failed to upload PDF'}`)
+        }
+
+        const { data: pubData } = supabase.storage.from(bucketUsed).getPublicUrl(filePath)
+        uploadedPdfUrl = pubData.publicUrl
+        formData.set('pdfUrl', uploadedPdfUrl)
+        setUploadProgress(75)
+      }
+
+      // 2. Direct Client-to-Supabase Storage Upload for Images
+      if (fileType === 'image' && selectedImages.length > 0) {
         const total = selectedImages.length
         for (let i = 0; i < total; i++) {
           const item = selectedImages[i]
-          setUploadStatusText(`Compressing page ${i + 1} of ${total}...`)
-          setUploadProgress(20 + Math.floor(((i + 1) / total) * 50))
+          setUploadStatusText(`Compressing & uploading page ${i + 1} of ${total}...`)
+          setUploadProgress(15 + Math.floor(((i + 1) / total) * 60))
+
+          let fileBlob: Blob = item.file
           try {
-            const compressed = await compressImage(item.file)
-            formData.append('images', compressed)
+            fileBlob = await compressImage(item.file)
           } catch {
+            fileBlob = item.file
+          }
+
+          const ext = item.file.name.split('.').pop() || 'webp'
+          const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
+
+          const { error: imgErr } = await supabase.storage
+            .from('note-images')
+            .upload(filePath, fileBlob, { cacheControl: '3600', upsert: false })
+
+          if (!imgErr) {
+            const { data: pubData } = supabase.storage.from('note-images').getPublicUrl(filePath)
+            uploadedImageUrls.push(pubData.publicUrl)
+          } else {
+            // Fall back to sending raw image in formData if direct storage upload failed
             formData.append('images', item.file)
           }
         }
-      } else if (fileType === 'pdf' && pdfFile) {
-        setUploadStatusText('Processing PDF document...')
-        setUploadProgress(50)
-        formData.set('pdf', pdfFile)
+
+        if (uploadedImageUrls.length > 0) {
+          formData.set('imageUrls', JSON.stringify(uploadedImageUrls))
+        }
       }
 
       setUploadStatusText('Publishing to SIES Notes Vault...')
@@ -189,7 +248,7 @@ export default function UploadModal({
       setSelectedImages([])
       setPdfFile(null)
     } catch (err: unknown) {
-      console.error('Upload error:', err)
+      console.error('Upload note error:', err)
       const errObj = err as Record<string, unknown>
       let msg =
         (errObj?.message as string) ||
@@ -200,7 +259,7 @@ export default function UploadModal({
           : 'Upload failed')
 
       if (msg.includes('Server Components render') || msg.includes('omitted in production')) {
-        msg = 'Server upload failed. Please check file size or network connection.'
+        msg = 'Upload failed. Please check your network connection or try a smaller file.'
       }
 
       setError(msg)

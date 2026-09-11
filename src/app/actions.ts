@@ -39,90 +39,108 @@ export async function createPost(formData: FormData) {
 
   const defaultTitle = userTitle.trim() || caption.trim().slice(0, 35) || (subObj ? `${subObj.name} Note` : 'Class Note')
 
+  const clientPdfUrl = formData.get('pdfUrl') as string | null
+  const clientImageUrlsRaw = formData.get('imageUrls') as string | null
+
   const imageUrls: string[] = []
   let imageUrl: string | null = null
   let pdfUrl: string | null = null
 
-  if (fileType === 'image' && imageFiles.length > 0) {
-    for (const imgFile of imageFiles) {
-      try {
-        const ext = imgFile.name.split('.').pop() || 'webp'
-        const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
+  if (clientPdfUrl && clientPdfUrl.trim().length > 0) {
+    pdfUrl = clientPdfUrl.trim()
+  }
 
-        // Convert File to Buffer for Node server environment compatibility
-        const arrayBuffer = await imgFile.arrayBuffer()
-        const buffer = Buffer.from(arrayBuffer)
-
-        const { error: uploadError } = await supabase.storage
-          .from('note-images')
-          .upload(filePath, buffer, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: imgFile.type || 'image/webp',
-          })
-
-        if (uploadError) {
-          console.error('Failed uploading single image in multi-image batch:', uploadError)
-          continue
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('note-images')
-          .getPublicUrl(filePath)
-
-        imageUrls.push(publicUrl)
-      } catch (err) {
-        console.error('Error processing image upload:', err)
+  if (clientImageUrlsRaw && clientImageUrlsRaw.trim().length > 0) {
+    try {
+      const parsed = JSON.parse(clientImageUrlsRaw)
+      if (Array.isArray(parsed)) {
+        imageUrls.push(...parsed.map((u) => String(u)))
+        imageUrl = imageUrls.join(',')
       }
+    } catch {
+      // invalid JSON
     }
+  }
 
-    if (imageUrls.length > 0) {
-      imageUrl = imageUrls.join(',')
-    }
-  } else if (fileType === 'pdf' && pdfFile && pdfFile.size > 0) {
-    const cleanFileName = (pdfFile.name || 'document.pdf').replace(/[^a-zA-Z0-9.-]/g, '_')
-    const filePath = `${user.id}/${Date.now()}_${cleanFileName}`
+  // If client-side upload didn't provide pdfUrl or imageUrls, execute server-side upload fallback
+  if (!pdfUrl && !imageUrl) {
+    if (fileType === 'image' && imageFiles.length > 0) {
+      for (const imgFile of imageFiles) {
+        try {
+          const ext = imgFile.name.split('.').pop() || 'webp'
+          const filePath = `${user.id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`
 
-    // Convert PDF File to Buffer for Node server environment compatibility
-    const pdfArrayBuffer = await pdfFile.arrayBuffer()
-    const pdfBuffer = Buffer.from(pdfArrayBuffer)
+          const arrayBuffer = await imgFile.arrayBuffer()
+          const buffer = Buffer.from(arrayBuffer)
 
-    // Try uploading to 'note-pdfs' bucket first
-    let bucketName = 'note-pdfs'
-    let uploadResult = await supabase.storage
-      .from(bucketName)
-      .upload(filePath, pdfBuffer, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: 'application/pdf',
-      })
+          const { error: uploadError } = await supabase.storage
+            .from('note-images')
+            .upload(filePath, buffer, {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: imgFile.type || 'image/webp',
+            })
 
-    let uploadError = uploadResult.error
+          if (uploadError) {
+            console.error('Failed uploading single image in multi-image batch:', uploadError)
+            continue
+          }
 
-    // If 'note-pdfs' bucket failed for any reason (e.g. bucket doesn't exist, 404, RLS issue), fallback to 'note-images'
-    if (uploadError) {
-      console.warn('Uploading to note-pdfs bucket failed, attempting fallback to note-images bucket:', uploadError.message)
-      bucketName = 'note-images'
-      const fallbackResult = await supabase.storage
+          const { data: { publicUrl } } = supabase.storage
+            .from('note-images')
+            .getPublicUrl(filePath)
+
+          imageUrls.push(publicUrl)
+        } catch (err) {
+          console.error('Error processing image upload:', err)
+        }
+      }
+
+      if (imageUrls.length > 0) {
+        imageUrl = imageUrls.join(',')
+      }
+    } else if (fileType === 'pdf' && pdfFile && pdfFile.size > 0) {
+      const cleanFileName = (pdfFile.name || 'document.pdf').replace(/[^a-zA-Z0-9.-]/g, '_')
+      const filePath = `${user.id}/${Date.now()}_${cleanFileName}`
+
+      const pdfArrayBuffer = await pdfFile.arrayBuffer()
+      const pdfBuffer = Buffer.from(pdfArrayBuffer)
+
+      let bucketName = 'note-pdfs'
+      let uploadResult = await supabase.storage
         .from(bucketName)
         .upload(filePath, pdfBuffer, {
           cacheControl: '3600',
           upsert: false,
           contentType: 'application/pdf',
         })
-      uploadError = fallbackResult.error
+
+      let uploadError = uploadResult.error
+
+      if (uploadError) {
+        console.warn('Uploading to note-pdfs bucket failed, attempting fallback to note-images bucket:', uploadError.message)
+        bucketName = 'note-images'
+        const fallbackResult = await supabase.storage
+          .from(bucketName)
+          .upload(filePath, pdfBuffer, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: 'application/pdf',
+          })
+        uploadError = fallbackResult.error
+      }
+
+      if (uploadError) {
+        console.error('Failed uploading PDF to storage:', uploadError)
+        throw new Error(`Failed to upload PDF file: ${uploadError.message || 'Storage error'}`)
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(filePath)
+
+      pdfUrl = publicUrl
     }
-
-    if (uploadError) {
-      console.error('Failed uploading PDF to storage:', uploadError)
-      throw new Error(`Failed to upload PDF file: ${uploadError.message || 'Storage error'}`)
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(filePath)
-
-    pdfUrl = publicUrl
   }
 
   // Attempt direct post insertion with all fields
