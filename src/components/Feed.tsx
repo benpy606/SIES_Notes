@@ -2,14 +2,16 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Header from './Header'
 import SubjectCarousel from './SubjectCarousel'
 import PostList from './PostList'
-import UploadModal from './UploadModal'
-import Lightbox from './Lightbox'
-import PdfViewerModal from './PdfViewerModal'
 import FloatingUpload from './FloatingUpload'
 import SideMenu from './SideMenu'
+
+const UploadModal = dynamic(() => import('./UploadModal'), { ssr: false })
+const Lightbox = dynamic(() => import('./Lightbox'), { ssr: false })
+const PdfViewerModal = dynamic(() => import('./PdfViewerModal'), { ssr: false })
 
 type Profile = {
   id: string

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, memo } from 'react'
 import { deletePost, toggleUpvote, togglePinPost, toggleVerifyPost } from '@/app/actions'
 import Image from 'next/image'
 import {
@@ -72,7 +72,7 @@ type PostWithRelations = {
   upvotes: { count: number }[]
 }
 
-export default function PostCardComponent({
+function PostCardComponent({
   post,
   subjects,
   currentUserId,
@@ -247,9 +247,12 @@ export default function PostCardComponent({
   }
 
   return (
-    <article className={`paper-card bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-md ${
-      isPinned ? 'border-amber-400/80 ring-1 ring-amber-400/30' : 'border-slate-200 dark:border-slate-800'
-    }`}>
+    <article
+      style={{ contain: 'content' }}
+      className={`paper-card bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-md ${
+        isPinned ? 'border-amber-400/80 ring-1 ring-amber-400/30' : 'border-slate-200 dark:border-slate-800'
+      }`}
+    >
       {/* Pinned Note Banner */}
       {isPinned && (
         <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 px-4 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 font-mono-paper shadow-xs">
@@ -432,7 +435,8 @@ export default function PostCardComponent({
                   src={url}
                   alt={`Lecture note preview page ${idx + 1}`}
                   fill
-                  unoptimized
+                  sizes="(max-width: 640px) 100vw, 448px"
+                  quality={82}
                   className="object-cover transition-transform duration-500 group-hover/img:scale-105"
                   loading={idx === 0 ? 'eager' : 'lazy'}
                 />
@@ -586,3 +590,6 @@ export default function PostCardComponent({
     </article>
   )
 }
+
+const MemoizedPostCard = memo(PostCardComponent)
+export default MemoizedPostCard

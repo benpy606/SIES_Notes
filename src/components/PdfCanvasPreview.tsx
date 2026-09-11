@@ -100,6 +100,8 @@ export default function PdfCanvasPreview({
 
   useEffect(() => {
     let isMounted = true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let activeRenderTask: any = null
 
     async function renderPdfPage() {
       if (!url) return
@@ -129,15 +131,17 @@ export default function PdfCanvasPreview({
         const ctx = canvas.getContext('2d')
         if (!ctx) return
 
-        // Base render scale: crisp high-resolution baseline (2.0x)
-        const renderScale = 2.0
+        // Baseline render scale: 1.0x for feed thumbnails (fast, lightweight memory), 2.0x for interactive modal viewer
+        const renderScale = mode === 'thumbnail' ? 1.0 : 2.0
         const viewport = page.getViewport({ scale: renderScale })
-        
-        const outputScale = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1
+
+        const rawDpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1
+        // Cap output DPR at 1.5 for thumbnails to avoid GPU texture bloat
+        const outputScale = mode === 'thumbnail' ? Math.min(rawDpr, 1.5) : Math.min(rawDpr, 2.0)
+
         canvas.width = Math.floor(viewport.width * outputScale)
         canvas.height = Math.floor(viewport.height * outputScale)
 
-        // Fit width by default for large, clear readability on mobile screens
         if (mode === 'thumbnail') {
           canvas.style.width = '100%'
           canvas.style.height = 'auto'
@@ -151,19 +155,24 @@ export default function PdfCanvasPreview({
 
         ctx.scale(outputScale, outputScale)
 
-        await page.render({
+        activeRenderTask = page.render({
           canvasContext: ctx,
           viewport,
-        }).promise
+        })
+
+        await activeRenderTask.promise
 
         if (isMounted) {
           setLoading(false)
         }
-      } catch (err) {
-        console.warn('PDF.js canvas rendering notice:', err)
-        if (isMounted) {
-          setError(true)
-          setLoading(false)
+      } catch (err: unknown) {
+        const isCancel = err && typeof err === 'object' && 'name' in err && err.name === 'RenderingCancelledException'
+        if (!isCancel) {
+          console.warn('PDF.js canvas rendering notice:', err)
+          if (isMounted) {
+            setError(true)
+            setLoading(false)
+          }
         }
       }
     }
@@ -172,8 +181,20 @@ export default function PdfCanvasPreview({
 
     return () => {
       isMounted = false
+      if (activeRenderTask) {
+        try {
+          activeRenderTask.cancel()
+        } catch {
+          // ignore task cancellation errors
+        }
+      }
+      if (canvasRef.current) {
+        // Clear canvas dimensions to release browser GPU memory
+        canvasRef.current.width = 0
+        canvasRef.current.height = 0
+      }
     }
-  }, [url, currentPage])
+  }, [url, currentPage, mode])
 
   // Mouse & Touch Pan / Zoom Handlers for Interactive Reader Mode
   const handlePointerDown = (clientX: number, clientY: number) => {

@@ -61,78 +61,72 @@ export default async function Home() {
   let posts: PostModel[] = []
 
   try {
-    // 1. Fetch current profile
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle()
-    profile = prof
-
-    // 2. Fetch subjects
-    const { data: subs } = await supabase
-      .from('subjects')
-      .select('*')
-      .order('name')
-    subjects = (subs as SubjectModel[]) || []
-
-    // 3. Fetch posts cleanly without failing foreign key nested queries
-    const { data: simplePosts, error: postErr } = await supabase
-      .from('posts')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (postErr) {
-      console.error('Error fetching posts:', postErr.message)
-    }
-
-    const rawPosts: PostModel[] = (simplePosts as PostModel[]) || []
-
-    // 3b. Fetch upvotes count map
-    const postIds = rawPosts.map((p) => p.id).filter(Boolean)
-    const upvotesCountMap: Record<string, number> = {}
-    if (postIds.length > 0) {
-      const { data: upvoteData } = await supabase
-        .from('upvotes')
-        .select('post_id')
-        .in('post_id', postIds)
-
-      if (upvoteData) {
-        upvoteData.forEach((uv) => {
-          if (uv.post_id) {
-            upvotesCountMap[uv.post_id] = (upvotesCountMap[uv.post_id] || 0) + 1
-          }
-        })
-      }
-    }
-
-    // 4. Enrich author profiles for all fetched posts
-    const userIds = Array.from(new Set(rawPosts.map((p) => p.user_id).filter(Boolean)))
-    let profilesMap: Record<string, { id: string; full_name: string; is_admin: boolean }> = {}
-    if (userIds.length > 0) {
-      const { data: profs } = await supabase
+    // 1. Concurrently fetch profile, subjects, and posts in parallel
+    const [profileRes, subjectsRes, postsRes] = await Promise.all([
+      supabase
         .from('profiles')
+        .select('id, full_name, is_admin')
+        .eq('id', userId)
+        .maybeSingle(),
+      supabase
+        .from('subjects')
+        .select('id, name, color_code')
+        .order('name'),
+      supabase
+        .from('posts')
         .select('*')
-        .in('id', userIds)
-      if (profs) {
-        profilesMap = Object.fromEntries(profs.map((pr) => [pr.id, pr]))
-      }
+        .order('created_at', { ascending: false }),
+    ])
+
+    profile = profileRes.data
+    subjects = (subjectsRes.data as SubjectModel[]) || []
+
+    if (postsRes.error) {
+      console.error('Error fetching posts:', postsRes.error.message)
     }
 
-    // 5. Enrich subjects for posts missing subject object
+    const rawPosts: PostModel[] = (postsRes.data as PostModel[]) || []
+
+    const postIds = rawPosts.map((p) => p.id).filter(Boolean)
+    const userIds = Array.from(new Set(rawPosts.map((p) => p.user_id).filter(Boolean)))
+    const lectureIds = Array.from(new Set(rawPosts.map((p) => p.lecture_id).filter(Boolean))) as string[]
+
+    // 2. Concurrently fetch upvotes, author profiles, and lectures in parallel
+    const [upvotesRes, profilesRes, lecturesRes] = await Promise.all([
+      postIds.length > 0
+        ? supabase.from('upvotes').select('post_id').in('post_id', postIds)
+        : Promise.resolve({ data: null }),
+      userIds.length > 0
+        ? supabase.from('profiles').select('id, full_name, is_admin').in('id', userIds)
+        : Promise.resolve({ data: null }),
+      lectureIds.length > 0
+        ? supabase.from('lectures').select('id, subject_id, date, lecture_number, topic, subject:subjects(id, name, color_code)').in('id', lectureIds)
+        : Promise.resolve({ data: null }),
+    ])
+
+    // Build upvotes count map
+    const upvotesCountMap: Record<string, number> = {}
+    if (upvotesRes.data) {
+      upvotesRes.data.forEach((uv) => {
+        if (uv.post_id) {
+          upvotesCountMap[uv.post_id] = (upvotesCountMap[uv.post_id] || 0) + 1
+        }
+      })
+    }
+
+    // Build profiles map
+    let profilesMap: Record<string, { id: string; full_name: string; is_admin: boolean }> = {}
+    if (profilesRes.data) {
+      profilesMap = Object.fromEntries(profilesRes.data.map((pr) => [pr.id, pr]))
+    }
+
+    // Build subjects map
     const subjectsMap = Object.fromEntries(subjects.map((s) => [s.id, s]))
 
-    // 6. Enrich lectures if needed
-    const lectureIds = Array.from(new Set(rawPosts.map((p) => p.lecture_id).filter(Boolean))) as string[]
+    // Build lectures map
     let lecturesMap: Record<string, { id: string; subject_id?: string; subject?: SubjectModel }> = {}
-    if (lectureIds.length > 0) {
-      const { data: lecs } = await supabase
-        .from('lectures')
-        .select('*, subject:subjects(*)')
-        .in('id', lectureIds)
-      if (lecs) {
-        lecturesMap = Object.fromEntries(lecs.map((l) => [l.id, l]))
-      }
+    if (lecturesRes.data) {
+      lecturesMap = Object.fromEntries(lecturesRes.data.map((l) => [l.id, l]))
     }
 
     // Combine enriched post models

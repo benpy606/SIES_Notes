@@ -17,7 +17,8 @@ const nextConfig: NextConfig = {
         hostname: "ryyhtihsvpzldrlizqae.supabase.co",
       },
     ],
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 3600,
   },
 };
 

@@ -1,12 +1,14 @@
 'use client'
 
+import { memo } from 'react'
+
 type Subject = {
   id: string
   name: string
   color_code: string
 }
 
-export default function SubjectCarousel({
+function SubjectCarousel({
   subjects,
   selected,
   onSelect,
@@ -52,3 +54,5 @@ export default function SubjectCarousel({
     </div>
   )
 }
+
+export default memo(SubjectCarousel)
