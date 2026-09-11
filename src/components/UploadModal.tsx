@@ -64,6 +64,12 @@ export default function UploadModal({
   useEffect(() => {
     if (isOpen) {
       closeBtnRef.current?.focus()
+      setSubjectId('')
+      setTitle('')
+      setCaption('')
+      setSelectedImages([])
+      setPdfFile(null)
+      setError(null)
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -251,6 +257,7 @@ export default function UploadModal({
       await createPost(formData)
       setUploadProgress(100)
       onClose()
+      setSubjectId('')
       setTitle('')
       setCaption('')
       setSelectedImages([])

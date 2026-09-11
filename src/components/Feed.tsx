@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from './Header'
 import SubjectCarousel from './SubjectCarousel'
 import PostList from './PostList'
@@ -55,6 +56,10 @@ export default function Feed({
   subjects: Subject[]
   posts: PostWithRelations[]
 }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [isRefreshingState, setIsRefreshingState] = useState(false)
+
   const [subjects] = useState<Subject[]>(initialSubjects)
   const [selectedSubject, setSelectedSubject] = useState<string>('All')
   const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'image' | 'pdf'>('all')
@@ -64,6 +69,16 @@ export default function Feed({
   const [lightboxData, setLightboxData] = useState<{ images: string[]; initialIndex: number } | null>(null)
   const [pdfModalData, setPdfModalData] = useState<{ url: string; title: string } | null>(null)
 
+  const isRefreshing = isPending || isRefreshingState
+
+  const handleRefresh = () => {
+    setIsRefreshingState(true)
+    startTransition(() => {
+      router.refresh()
+    })
+    setTimeout(() => setIsRefreshingState(false), 1200)
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex justify-center selection:bg-amber-400 selection:text-slate-950">
       <div className="w-full max-w-md relative flex flex-col min-h-screen border-x border-slate-200/90 dark:border-slate-800/80 bg-[var(--background)] text-[var(--foreground)] shadow-2xl shadow-slate-950/40 z-10 transition-colors">
@@ -71,6 +86,8 @@ export default function Feed({
           profile={profile}
           onOpenSideMenu={() => setIsSideMenuOpen(true)}
           onOpenUpload={() => setIsModalOpen(true)}
+          isRefreshing={isRefreshing}
+          onRefresh={handleRefresh}
         />
 
         <SubjectCarousel

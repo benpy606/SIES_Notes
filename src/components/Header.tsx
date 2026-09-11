@@ -1,6 +1,6 @@
 'use client'
 
-import { Sparkles, Menu, Plus } from 'lucide-react'
+import { Sparkles, Menu, Plus, RefreshCw } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 type Profile = {
@@ -13,10 +13,14 @@ export default function Header({
   profile,
   onOpenSideMenu,
   onOpenUpload,
+  isRefreshing = false,
+  onRefresh,
 }: {
   profile: Profile
   onOpenSideMenu?: () => void
   onOpenUpload?: () => void
+  isRefreshing?: boolean
+  onRefresh?: () => void
 }) {
   const initials =
     profile.full_name
@@ -55,7 +59,26 @@ export default function Header({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            title={isRefreshing ? 'Reloading feed...' : 'Reload feed'}
+            aria-label="Reload page feed"
+            className={`p-2 min-w-[36px] min-h-[36px] rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-slate-800 transition-all flex items-center justify-center border border-transparent hover:border-slate-200/80 dark:hover:border-slate-700 ${
+              isRefreshing ? 'text-amber-500 dark:text-amber-400 bg-amber-400/10' : ''
+            }`}
+          >
+            <RefreshCw
+              size={16}
+              className={`stroke-[2.5] transition-transform ${
+                isRefreshing ? 'animate-spin text-amber-500 dark:text-amber-400' : ''
+              }`}
+            />
+          </button>
+        )}
+
         {onOpenUpload && (
           <button
             onClick={onOpenUpload}
