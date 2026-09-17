@@ -8,6 +8,15 @@ type Subject = {
   color_code: string
 }
 
+const getVibrantColor = (name: string, defaultColor: string) => {
+  if (name.includes('Computation')) return '#A855F7'
+  if (name.includes('Arch')) return '#10B981'
+  if (name.includes('Networks')) return '#06B6D4'
+  if (name.includes('Imperative')) return '#3B82F6'
+  if (name.includes('Indian')) return '#64748B'
+  return defaultColor
+}
+
 function SubjectCarousel({
   subjects,
   selected,
@@ -38,15 +47,17 @@ function SubjectCarousel({
         </button>
         {subjects.map((sub) => {
           const isSelected = selected === sub.name
+          const vibrantColor = getVibrantColor(sub.name, sub.color_code)
           return (
             <button
               key={sub.id}
               role="tab"
               aria-selected={isSelected}
               onClick={() => onSelect(sub.name)}
+              style={isSelected ? { backgroundColor: vibrantColor, boxShadow: `0 4px 6px -1px ${vibrantColor}4D` } : undefined}
               className={`min-h-[42px] px-5 rounded-full text-xs font-black transition-all shrink-0 flex items-center justify-center font-display hover-bounce cursor-pointer ${
                 isSelected
-                  ? 'bg-[#4F46E5] text-white shadow-md shadow-[#4F46E5]/30'
+                  ? 'text-white shadow-md'
                   : 'bg-transparent text-slate-700 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/10'
               }`}
             >

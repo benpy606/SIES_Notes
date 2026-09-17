@@ -16,6 +16,15 @@ type Subject = {
   color_code: string
 }
 
+const getVibrantColor = (name: string, defaultColor: string) => {
+  if (name.includes('Computation')) return '#A855F7'
+  if (name.includes('Arch')) return '#10B981'
+  if (name.includes('Networks')) return '#06B6D4'
+  if (name.includes('Imperative')) return '#3B82F6'
+  if (name.includes('Indian')) return '#64748B'
+  return defaultColor
+}
+
 function SideMenu({
   isOpen,
   onClose,
@@ -172,6 +181,7 @@ function SideMenu({
 
             {subjects.map((sub) => {
               const isSelected = selectedSubject === sub.name
+              const vibrantColor = getVibrantColor(sub.name, sub.color_code)
               return (
                 <button
                   key={sub.id}
@@ -179,16 +189,17 @@ function SideMenu({
                     onSelectSubject(sub.name)
                     onClose()
                   }}
+                  style={isSelected ? { backgroundColor: `${vibrantColor}33`, color: vibrantColor, borderColor: `${vibrantColor}66` } : undefined}
                   className={`w-full text-left px-4 py-3 min-h-[44px] rounded-xl text-xs font-extrabold flex items-center justify-between transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/40 shadow-xs'
-                      : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                      ? 'border shadow-xs'
+                      : 'text-zinc-400 hover:bg-white/5 hover:text-white border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <span
                       className="w-3.5 h-3.5 rounded-full ring-2 ring-white/20 shadow-xs shrink-0"
-                      style={{ backgroundColor: sub.color_code }}
+                      style={{ backgroundColor: vibrantColor }}
                     />
                     <span className="truncate font-display">{sub.name}</span>
                   </div>
