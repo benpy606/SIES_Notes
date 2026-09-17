@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo } from 'react'
 import { X, LogOut, BookOpen, Upload, FileText, Image as ImageIcon, User, Filter, Sparkles } from 'lucide-react'
 import { signOut } from '@/app/actions'
 
@@ -16,7 +16,7 @@ type Subject = {
   color_code: string
 }
 
-export default function SideMenu({
+function SideMenu({
   isOpen,
   onClose,
   profile,
@@ -63,23 +63,23 @@ export default function SideMenu({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity"
         onClick={onClose}
       />
 
       {/* Drawer Content */}
-      <div className="relative w-84 max-w-[88vw] bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 h-full flex flex-col shadow-2xl z-10 animate-slide-up overflow-y-auto">
+      <div className="relative w-84 max-w-[88vw] bg-[#0D0F18] border-r border-slate-800 text-slate-100 h-full flex flex-col shadow-2xl z-10 animate-slide-up overflow-y-auto no-scrollbar">
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800/90 flex items-center justify-between bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md sticky top-0 z-10">
+        <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-[#0D0F18]/90 backdrop-blur-md sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 via-amber-500 to-rose-500 text-slate-950 flex items-center justify-center font-black text-base shadow-md shadow-orange-500/20 ring-2 ring-white/20">
+            <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-blue-500/20 ring-2 ring-white/20">
               {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : <User size={18} />}
             </div>
             <div className="flex flex-col">
-              <span className="font-display font-extrabold text-sm text-slate-900 dark:text-slate-50 line-clamp-1">
+              <span className="font-display font-extrabold text-sm text-white line-clamp-1">
                 {profile.full_name || 'Student User'}
               </span>
-              <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-0.5 font-mono-paper">
+              <span className="text-[11px] font-bold text-amber-300 mt-0.5 font-mono-paper">
                 BSCIT Student
               </span>
             </div>
@@ -87,7 +87,7 @@ export default function SideMenu({
           <button
             ref={closeBtnRef}
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-700 focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="p-2 min-w-[40px] min-h-[40px] rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-700 flex items-center justify-center cursor-pointer"
             aria-label="Close menu"
           >
             <X size={20} />
@@ -95,13 +95,13 @@ export default function SideMenu({
         </div>
 
         {/* Action Button */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-slate-900/40">
+        <div className="p-4 border-b border-slate-800/80 bg-slate-900/40">
           <button
             onClick={() => {
               onClose()
               onOpenUpload()
             }}
-            className="w-full py-3 px-4 bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-orange-600/25 transition-all hover-bounce uppercase tracking-wider"
+            className="w-full py-3 px-4 min-h-[44px] bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 transition-all hover-bounce uppercase tracking-wider cursor-pointer"
           >
             <Upload size={16} className="stroke-[2.5]" />
             <span>Upload New Note</span>
@@ -109,37 +109,37 @@ export default function SideMenu({
         </div>
 
         {/* Content Type Filter */}
-        <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800/80">
-          <h4 className="text-[11px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest font-mono-paper mb-2.5 flex items-center gap-1.5">
-            <Filter size={12} className="text-amber-500 dark:text-amber-400" /> Format Filter
+        <div className="px-5 py-4 border-b border-slate-800/80">
+          <h4 className="text-[11px] font-black text-amber-400 uppercase tracking-widest font-mono-paper mb-2.5 flex items-center gap-1.5">
+            <Filter size={12} className="text-amber-400" /> Format Filter
           </h4>
-          <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800">
             <button
               onClick={() => onSelectFileType('all')}
-              className={`py-1.5 px-2 rounded-lg text-xs font-extrabold transition-all ${
+              className={`py-2 px-2 min-h-[38px] rounded-lg text-xs font-black transition-all cursor-pointer ${
                 fileTypeFilter === 'all'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               All
             </button>
             <button
               onClick={() => onSelectFileType('image')}
-              className={`py-1.5 px-2 rounded-lg text-xs font-extrabold flex items-center justify-center gap-1 transition-all ${
+              className={`py-2 px-2 min-h-[38px] rounded-lg text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
                 fileTypeFilter === 'image'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               <ImageIcon size={12} /> Images
             </button>
             <button
               onClick={() => onSelectFileType('pdf')}
-              className={`py-1.5 px-2 rounded-lg text-xs font-extrabold flex items-center justify-center gap-1 transition-all ${
+              className={`py-2 px-2 min-h-[38px] rounded-lg text-xs font-black flex items-center justify-center gap-1 transition-all cursor-pointer ${
                 fileTypeFilter === 'pdf'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-slate-300 hover:text-white'
               }`}
             >
               <FileText size={12} /> PDFs
@@ -148,9 +148,9 @@ export default function SideMenu({
         </div>
 
         {/* Subjects List */}
-        <div className="flex-1 p-5 overflow-y-auto">
-          <h4 className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest font-mono-paper mb-3 flex items-center gap-1.5">
-            <BookOpen size={12} className="text-orange-500" /> Subjects
+        <div className="flex-1 p-5 overflow-y-auto no-scrollbar">
+          <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest font-mono-paper mb-3 flex items-center gap-1.5">
+            <BookOpen size={12} className="text-blue-400" /> Subjects
           </h4>
           <div className="space-y-1.5">
             <button
@@ -158,14 +158,14 @@ export default function SideMenu({
                 onSelectSubject('All')
                 onClose()
               }}
-              className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
+              className={`w-full text-left px-4 py-3 min-h-[44px] rounded-xl text-xs font-extrabold flex items-center justify-between transition-all cursor-pointer ${
                 selectedSubject === 'All'
-                  ? 'bg-amber-400/20 text-slate-900 dark:text-amber-400 border border-amber-500/40 shadow-xs'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-xs'
+                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <Sparkles size={14} className={selectedSubject === 'All' ? 'text-amber-500 dark:text-amber-400' : 'text-slate-400 dark:text-slate-500'} />
+                <Sparkles size={14} className={selectedSubject === 'All' ? 'text-blue-400' : 'text-slate-500'} />
                 <span className="font-display">All Subjects</span>
               </div>
             </button>
@@ -179,15 +179,15 @@ export default function SideMenu({
                     onSelectSubject(sub.name)
                     onClose()
                   }}
-                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
+                  className={`w-full text-left px-4 py-3 min-h-[44px] rounded-xl text-xs font-extrabold flex items-center justify-between transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-amber-400/20 text-slate-900 dark:text-amber-400 border border-amber-500/40 shadow-xs'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-xs'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                   }`}
                 >
                   <div className="flex items-center gap-2.5">
                     <span
-                      className="w-3 h-3 rounded-full ring-2 ring-slate-300 dark:ring-white/20 shadow-xs shrink-0"
+                      className="w-3.5 h-3.5 rounded-full ring-2 ring-white/20 shadow-xs shrink-0"
                       style={{ backgroundColor: sub.color_code }}
                     />
                     <span className="truncate font-display">{sub.name}</span>
@@ -199,24 +199,24 @@ export default function SideMenu({
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800/90 bg-slate-50 dark:bg-slate-900/60 flex flex-col gap-3">
+        <div className="p-4 border-t border-slate-800/90 bg-slate-950/60 flex flex-col gap-3">
           <form action={signOut}>
             <button
               type="submit"
-              className="w-full py-2.5 px-3 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-transparent hover:border-rose-200 dark:hover:border-rose-800/40 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
+              className="w-full py-2.5 px-3 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 border border-transparent hover:border-rose-800/40 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <LogOut size={16} />
               <span>Sign Out</span>
             </button>
           </form>
-          <div className="text-center pt-2 border-t border-slate-200 dark:border-slate-800/60 space-y-1">
-            <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 dark:text-slate-400">
-              <a href="/privacy" className="hover:text-amber-500 transition-colors font-medium">Privacy</a>
+          <div className="text-center pt-2 border-t border-slate-800/60 space-y-1">
+            <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400">
+              <a href="/privacy" className="hover:text-blue-400 transition-colors font-bold">Privacy</a>
               <span>•</span>
-              <a href="/terms" className="hover:text-amber-500 transition-colors font-medium">Terms</a>
+              <a href="/terms" className="hover:text-blue-400 transition-colors font-bold">Terms</a>
             </div>
-            <span className="text-[10px] font-mono-paper font-bold text-slate-500 dark:text-slate-400 block">
-              Built with ⚡ by <span className="text-amber-600 dark:text-amber-400 font-extrabold">@benpy606</span>
+            <span className="text-[10px] font-mono-paper font-bold text-slate-400 block">
+              Built with ⚡ by <span className="text-amber-400 font-extrabold">@benpy606</span>
             </span>
           </div>
         </div>
@@ -224,3 +224,5 @@ export default function SideMenu({
     </div>
   )
 }
+
+export default memo(SideMenu)

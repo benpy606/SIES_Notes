@@ -271,11 +271,9 @@ function PostCardComponent({
             style={{ backgroundColor: subjectColor }}
           />
           <span
-            className="text-[11px] font-black tracking-wider uppercase font-mono-paper px-3 py-1 rounded-full border shadow-xs"
+            className="text-[11px] font-black tracking-wider uppercase font-mono-paper px-3 py-1 rounded-full shadow-md text-white border border-white/20"
             style={{
-              color: subjectColor,
-              borderColor: `${subjectColor}40`,
-              backgroundColor: `${subjectColor}20`,
+              backgroundColor: subjectColor,
             }}
           >
             {subjectName}
