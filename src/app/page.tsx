@@ -75,7 +75,8 @@ export default async function Home() {
       supabase
         .from('posts')
         .select('*')
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(50),
     ])
 
     profile = profileRes.data

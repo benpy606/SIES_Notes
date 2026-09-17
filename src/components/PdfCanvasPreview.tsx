@@ -86,6 +86,7 @@ export default function PdfCanvasPreview({
   const [zoom, setZoom] = useState<number>(1)
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
+  const [isInView, setIsInView] = useState(false)
 
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const pinchDistRef = useRef<number | null>(null)
@@ -99,12 +100,32 @@ export default function PdfCanvasPreview({
   }, [])
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }
+    )
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+    }
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  useEffect(() => {
     let isMounted = true
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let activeRenderTask: any = null
 
     async function renderPdfPage() {
-      if (!url) return
+      if (!url || !isInView) return
 
       try {
         setLoading(true)
@@ -194,7 +215,7 @@ export default function PdfCanvasPreview({
         canvasRef.current.height = 0
       }
     }
-  }, [url, currentPage, mode])
+  }, [url, currentPage, mode, isInView])
 
   // Mouse & Touch Pan / Zoom Handlers for Interactive Reader Mode
   const handlePointerDown = (clientX: number, clientY: number) => {

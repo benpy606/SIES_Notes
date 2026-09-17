@@ -120,7 +120,7 @@ export default function PostList({
           </p>
         </div>
       )}
-      {filteredPosts.map((post) => (
+      {filteredPosts.map((post, index) => (
         <PostCardComponent
           key={post.id}
           post={post}
@@ -129,6 +129,7 @@ export default function PostList({
           isAdmin={isAdmin}
           onImageClick={onImageClick}
           onPdfClick={onPdfClick}
+          isPriority={index < 2}
         />
       ))}
       <div className="pt-6 pb-2 text-center">
