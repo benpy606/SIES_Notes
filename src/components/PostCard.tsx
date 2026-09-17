@@ -20,6 +20,8 @@ import {
   CheckCircle2,
   Copy,
   Check,
+  ArrowUpRight,
+  Zap,
 } from 'lucide-react'
 import { getPostSubject } from './PostList'
 import dynamic from 'next/dynamic'
@@ -249,14 +251,14 @@ function PostCardComponent({
   return (
     <article
       style={{ contain: 'content' }}
-      className={`paper-card bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-md ${
-        isPinned ? 'border-amber-400/80 ring-1 ring-amber-400/30' : 'border-slate-200 dark:border-slate-800'
+      className={`paper-card bg-white dark:bg-[#0D0F18] text-slate-900 dark:text-slate-100 border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-xl rounded-3xl ${
+        isPinned ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-slate-200 dark:border-slate-800/80'
       }`}
     >
       {/* Pinned Note Banner */}
       {isPinned && (
         <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 px-4 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 font-mono-paper shadow-xs">
-          <Pin size={12} className="fill-slate-950 stroke-none" />
+          <Zap size={12} className="fill-slate-950 stroke-none" />
           <span>Pinned Announcement Note</span>
         </div>
       )}
@@ -269,7 +271,7 @@ function PostCardComponent({
             style={{ backgroundColor: subjectColor }}
           />
           <span
-            className="text-[11px] font-black tracking-wider uppercase font-mono-paper px-2.5 py-1 rounded-lg border shadow-xs"
+            className="text-[11px] font-black tracking-wider uppercase font-mono-paper px-3 py-1 rounded-full border shadow-xs"
             style={{
               color: subjectColor,
               borderColor: `${subjectColor}40`,
@@ -279,16 +281,16 @@ function PostCardComponent({
             {subjectName}
           </span>
           {isVerified && (
-            <span className="text-[10px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1 font-mono-paper">
+            <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 rounded-full flex items-center gap-1 font-mono-paper">
               <CheckCircle2 size={11} className="stroke-[2.5]" />
-              Verified Note
+              Verified
             </span>
           )}
           <span
             suppressHydrationWarning
-            className="text-[11px] text-slate-600 dark:text-slate-300 font-bold flex items-center gap-1"
+            className="text-[11px] text-slate-500 dark:text-slate-400 font-bold flex items-center gap-1 font-display"
           >
-            <Calendar size={12} className="text-amber-500 dark:text-amber-400" />
+            <Calendar size={12} className="text-blue-500 dark:text-blue-400" />
             {formattedDate}
           </span>
         </div>
@@ -412,12 +414,12 @@ function PostCardComponent({
       {allImageUrls.length > 0 && (
         <div className="w-full bg-slate-100 dark:bg-slate-950 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/img">
           {/* Top Multi-Page Badge Overlay */}
-          {allImageUrls.length > 1 && (
-            <div className="absolute top-3 right-3 z-20 bg-slate-950/85 backdrop-blur-md text-amber-400 text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-slate-700/80 shadow-lg flex items-center gap-1.5 font-mono-paper pointer-events-none">
-              <Layers size={12} className="stroke-[2.5]" />
-              <span>{activeImageIndex + 1} / {allImageUrls.length} Pages</span>
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-2 pointer-events-none">
+            <div className="bg-[#0EA5E9] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1 font-mono-paper">
+              <Zap size={12} className="fill-white stroke-none" />
+              <span>{allImageUrls.length > 1 ? `${activeImageIndex + 1}/${allImageUrls.length} Pages` : '⚡ Note'}</span>
             </div>
-          )}
+          </div>
 
           {/* Swipeable Scroll Container */}
           <div
@@ -440,6 +442,11 @@ function PostCardComponent({
                   className="object-cover transition-transform duration-500 group-hover/img:scale-105"
                   loading={idx === 0 ? 'eager' : 'lazy'}
                 />
+
+                {/* Bottom Right Corner Action Pill Button (from reference image) */}
+                <div className="absolute bottom-3 right-3 z-10 p-2 rounded-full bg-white/90 text-slate-900 shadow-xl backdrop-blur-md flex items-center justify-center hover-bounce">
+                  <ArrowUpRight size={16} className="stroke-[3]" />
+                </div>
 
                 {/* Hover Overlay */}
                 <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs pointer-events-none">

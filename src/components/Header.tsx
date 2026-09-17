@@ -22,16 +22,17 @@ export default function Header({
   isRefreshing?: boolean
   onRefresh?: () => void
 }) {
+  const firstName = profile.full_name?.split(' ')[0] || 'Student'
   const initials =
     profile.full_name
       ?.split(' ')
       .map((n) => n[0])
       .join('')
       .toUpperCase()
-      .slice(0, 2) || 'U'
+      .slice(0, 2) || 'S'
 
   return (
-    <header className="sticky top-0 z-30 glass-header px-4 py-3 flex items-center justify-between transition-all">
+    <header className="sticky top-0 z-30 glass-header px-5 py-3.5 flex items-center justify-between transition-all">
       <div className="flex items-center gap-3">
         {onOpenSideMenu && (
           <button
@@ -42,24 +43,22 @@ export default function Header({
             <Menu size={22} className="stroke-[2.2]" />
           </button>
         )}
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-600 via-amber-500 to-rose-600 flex items-center justify-center shadow-md hover-bounce ring-2 ring-orange-500/20">
-            <Sparkles className="w-4.5 h-4.5 text-white stroke-[2.5]" />
-          </div>
-          <div>
-            <h1 className="font-display text-base font-extrabold tracking-tight text-[var(--foreground)] flex items-center gap-2">
-              <span className="flex items-center">
-                SIES<span className="text-orange-500 font-black">_Notes</span>
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400 font-extrabold tracking-wider border border-amber-400/30 shadow-xs uppercase">
-                BSCIT
-              </span>
-            </h1>
+        <div className="flex flex-col justify-center">
+          <h1 className="font-display text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            Hello, {firstName}
+          </h1>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="w-4 h-4 rounded-md bg-amber-400 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-xs">
+              ⚡
+            </span>
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-wide font-display">
+              {profile.is_admin ? 'Admin Member' : 'BSCIT Member'}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-2">
         {onRefresh && (
           <button
             type="button"
@@ -82,7 +81,7 @@ export default function Header({
         {onOpenUpload && (
           <button
             onClick={onOpenUpload}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white font-extrabold text-xs shadow-md shadow-orange-500/20 hover-bounce transition-all active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs shadow-md shadow-blue-500/20 hover-bounce transition-all active:scale-95 cursor-pointer"
             aria-label="Upload new note"
           >
             <Plus size={15} className="stroke-[3]" />
@@ -94,14 +93,10 @@ export default function Header({
 
         <button
           onClick={onOpenSideMenu}
-          className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 transition-all shadow-sm hover-bounce"
+          aria-label="Profile options"
+          className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white hover:bg-blue-600 hover:text-white border border-slate-300 dark:border-slate-700 font-extrabold text-xs flex items-center justify-center transition-all shadow-xs hover-bounce"
         >
-          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 text-[10px] font-black text-slate-950 flex items-center justify-center ring-1 ring-white/40 shadow-xs">
-            {initials}
-          </div>
-          <span className="text-xs font-bold tracking-tight text-slate-900 dark:text-slate-100 max-w-[85px] truncate hidden xs:inline font-display">
-            {profile.full_name?.split(' ')[0] || 'User'}
-          </span>
+          {initials}
         </button>
       </div>
     </header>

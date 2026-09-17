@@ -4,27 +4,35 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root, html.dark, body.dark {
-  --background: #090D16;
+  --background: #05050B;
   --foreground: #F8FAFC;
-  --card-bg: #0F172A;
-  --card-border: #1E293B;
-  --header-bg: rgba(11, 17, 32, 0.92);
-  --header-border: #1E293B;
-  --carousel-bg: #090D16;
+  --card-bg: #0D0F18;
+  --card-border: #1E2338;
+  --header-bg: rgba(5, 5, 11, 0.92);
+  --header-border: #1E2338;
+  --carousel-bg: #05050B;
 
-  /* Accent Color Palette */
+  /* Hero Vibe Accent Color Palette (From Reference Image) */
+  --vibe-cobalt: #3B82F6;
+  --vibe-indigo: #4F46E5;
+  --vibe-coral: #FF3B30;
+  --vibe-amber: #F59E0B;
+  --vibe-cyan: #0EA5E9;
+  --vibe-pill-track: rgba(255, 255, 255, 0.96);
+
+  /* Fallback & Legacy Accent Tokens */
   --accent-terracotta: #EA580C;
   --accent-amber: #F59E0B;
   --accent-emerald: #10B981;
-  --accent-indigo: #6366F1;
+  --accent-indigo: #4F46E5;
   --accent-violet: #8B5CF6;
-  --accent-cyan: #06B6D4;
-  --accent-rose: #F43F5E;
+  --accent-cyan: #0EA5E9;
+  --accent-rose: #FF3B30;
 
-  /* Gradient Tokens */
-  --gradient-primary: linear-gradient(135deg, #EA580C 0%, #F59E0B 50%, #F43F5E 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(234, 88, 12, 0.3), rgba(245, 158, 11, 0.1));
-  --gradient-glow: radial-gradient(circle at top right, rgba(245, 158, 11, 0.15), transparent 70%);
+  /* Vibe Gradient Tokens */
+  --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #3B82F6 50%, #0EA5E9 100%);
+  --gradient-card-border: linear-gradient(135deg, rgba(79, 70, 229, 0.4), rgba(14, 165, 233, 0.2));
+  --gradient-glow: radial-gradient(circle at top right, rgba(79, 70, 229, 0.25), transparent 75%);
 }
 
 html.light, body.light, html:not(.dark), body:not(.dark) {
@@ -35,10 +43,11 @@ html.light, body.light, html:not(.dark), body:not(.dark) {
   --header-bg: rgba(255, 255, 255, 0.95);
   --header-border: #E2E8F0;
   --carousel-bg: #FFFFFF;
+  --vibe-pill-track: rgba(15, 23, 42, 0.06);
 
-  --gradient-primary: linear-gradient(135deg, #EA580C 0%, #D97706 50%, #E11D48 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(217, 119, 6, 0.1));
-  --gradient-glow: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), transparent 70%);
+  --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #2563EB 50%, #0EA5E9 100%);
+  --gradient-card-border: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(37, 99, 235, 0.1));
+  --gradient-glow: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent 70%);
 }
 
 html, body {
