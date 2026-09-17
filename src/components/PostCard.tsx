@@ -81,6 +81,7 @@ function PostCardComponent({
   isAdmin,
   onImageClick,
   onPdfClick,
+  isPriority = false,
 }: {
   post: PostWithRelations
   subjects: Subject[]
@@ -88,6 +89,7 @@ function PostCardComponent({
   isAdmin: boolean
   onImageClick: (images: string[], index: number) => void
   onPdfClick: (url: string, title: string) => void
+  isPriority?: boolean
 }) {
   const [showMenu, setShowMenu] = useState(false)
   const [showAdminMenu, setShowAdminMenu] = useState(false)
@@ -438,7 +440,7 @@ function PostCardComponent({
                   sizes="(max-width: 640px) 100vw, 448px"
                   quality={82}
                   className="object-cover transition-transform duration-500 group-hover/img:scale-105"
-                  loading={idx === 0 ? 'eager' : 'lazy'}
+                  priority={isPriority && idx === 0}
                 />
 
                 {/* Bottom Right Corner Action Pill Button (from reference image) */}
