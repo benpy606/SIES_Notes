@@ -82,8 +82,8 @@ export default function Feed({
   }
 
   return (
-    <div className="min-h-screen bg-slate-200 dark:bg-black text-slate-900 dark:text-slate-100 flex justify-center selection:bg-[#3B82F6] selection:text-white">
-      <div className="w-full max-w-md relative flex flex-col min-h-screen border-x border-slate-300/60 dark:border-zinc-800/60 bg-[var(--background)] text-[var(--foreground)] shadow-2xl shadow-slate-950/80 z-10 transition-colors duration-200">
+    <div className="min-h-screen bg-zinc-200 dark:bg-black text-[#121215] dark:text-zinc-100 flex justify-center selection:bg-[#3B82F6] selection:text-white">
+      <div className="w-full max-w-md relative flex flex-col min-h-screen border-x border-zinc-300/60 dark:border-zinc-800/60 bg-[var(--background)] text-[var(--foreground)] shadow-2xl shadow-black/80 z-10 transition-colors duration-200">
         <Header
           profile={profile}
           onOpenSideMenu={() => setIsSideMenuOpen(true)}

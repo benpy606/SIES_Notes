@@ -260,12 +260,12 @@ export default function PdfCanvasPreview({
 
   if (error) {
     return (
-      <div className={`w-full h-full flex flex-col items-center justify-center p-6 text-center bg-slate-950 text-slate-200 ${className}`}>
-        <div className="w-14 h-16 rounded-2xl bg-slate-900 border-2 border-amber-400/50 flex flex-col items-center justify-center gap-1 shadow-xl">
-          <FileText size={28} className="text-amber-400 stroke-[2.2]" />
-          <span className="text-[9px] font-black text-amber-400 uppercase tracking-widest font-mono-paper">PDF</span>
+      <div className={`w-full h-full flex flex-col items-center justify-center p-6 text-center bg-black text-zinc-200 ${className}`}>
+        <div className="w-14 h-16 rounded-2xl bg-[#121215] border-2 border-blue-500/50 flex flex-col items-center justify-center gap-1 shadow-xl">
+          <FileText size={28} className="text-blue-500 stroke-[2.2]" />
+          <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest font-mono-paper">PDF</span>
         </div>
-        <span className="mt-3 text-xs font-extrabold text-slate-100 font-display line-clamp-1 max-w-[220px]">
+        <span className="mt-3 text-xs font-extrabold text-zinc-100 font-display line-clamp-1 max-w-[220px]">
           {title || 'PDF Note Document'}
         </span>
       </div>
@@ -283,14 +283,14 @@ export default function PdfCanvasPreview({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handlePointerUp}
-      className={`relative w-full h-full flex flex-col items-center justify-center bg-slate-950 overflow-hidden select-none ${
+      className={`relative w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden select-none ${
         mode === 'interactive' ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''
       } ${className}`}
     >
       {loading && (
-        <div className="absolute inset-0 z-20 bg-slate-950/90 flex flex-col items-center justify-center gap-2.5 text-slate-300 pointer-events-none">
-          <RefreshCw size={24} className="animate-spin text-amber-400 stroke-[2.5]" />
-          <span className="text-[10px] font-bold font-mono-paper text-amber-400 uppercase tracking-widest">
+        <div className="absolute inset-0 z-20 bg-black/90 flex flex-col items-center justify-center gap-2.5 text-zinc-300 pointer-events-none">
+          <RefreshCw size={24} className="animate-spin text-blue-500 stroke-[2.5]" />
+          <span className="text-[10px] font-bold font-mono-paper text-blue-500 uppercase tracking-widest">
             Rendering PDF Canvas...
           </span>
         </div>
@@ -306,7 +306,7 @@ export default function PdfCanvasPreview({
       >
         <canvas
           ref={canvasRef}
-          className="shadow-2xl rounded-lg border border-slate-800 bg-white"
+          className="shadow-2xl rounded-lg border border-zinc-900 bg-white"
         />
       </div>
 
@@ -314,7 +314,7 @@ export default function PdfCanvasPreview({
       {mode === 'interactive' && numPages > 0 && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="sticky bottom-3 z-30 bg-slate-900/90 backdrop-blur-md px-3 sm:px-4 py-2 rounded-2xl border border-slate-800 flex items-center gap-2 sm:gap-3 shadow-2xl text-slate-200"
+          className="sticky bottom-3 z-30 bg-[#121215]/90 backdrop-blur-md px-3 sm:px-4 py-2 rounded-2xl border border-zinc-900 flex items-center gap-2 sm:gap-3 shadow-2xl text-zinc-200"
         >
           {/* Page Prev/Next */}
           <button
@@ -324,13 +324,13 @@ export default function PdfCanvasPreview({
               setCurrentPage((p) => Math.max(1, p - 1))
               resetView()
             }}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-amber-400 transition-colors"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 disabled:opacity-30 text-blue-500 transition-colors"
             title="Previous Page"
           >
             <ChevronLeft size={16} className="stroke-[3]" />
           </button>
           
-          <span className="text-[11px] sm:text-xs font-mono-paper font-bold text-slate-100 whitespace-nowrap">
+          <span className="text-[11px] sm:text-xs font-mono-paper font-bold text-zinc-100 whitespace-nowrap">
             {currentPage} / {numPages}
           </span>
 
@@ -341,32 +341,32 @@ export default function PdfCanvasPreview({
               setCurrentPage((p) => Math.min(numPages, p + 1))
               resetView()
             }}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-amber-400 transition-colors"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 disabled:opacity-30 text-blue-500 transition-colors"
             title="Next Page"
           >
             <ChevronRight size={16} className="stroke-[3]" />
           </button>
 
-          <div className="h-4 w-px bg-slate-800 my-auto" />
+          <div className="h-4 w-px bg-zinc-900 my-auto" />
 
           {/* Zoom controls */}
           <button
             type="button"
             onClick={() => setZoom((s) => Math.max(0.6, s - 0.25))}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors"
             title="Zoom Out"
           >
             <ZoomOut size={15} />
           </button>
 
-          <span className="text-[10px] font-mono-paper font-bold text-amber-400 min-w-[35px] text-center">
+          <span className="text-[10px] font-mono-paper font-bold text-blue-500 min-w-[35px] text-center">
             {Math.round(zoom * 100)}%
           </span>
 
           <button
             type="button"
             onClick={() => setZoom((s) => Math.min(4.0, s + 0.25))}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors"
             title="Zoom In"
           >
             <ZoomIn size={15} />
@@ -375,14 +375,14 @@ export default function PdfCanvasPreview({
           <button
             type="button"
             onClick={resetView}
-            className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 transition-colors"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-blue-500 transition-colors"
             title="Reset Pan & Zoom"
           >
             <RotateCcw size={15} />
           </button>
 
-          <div className="hidden xs:flex items-center gap-1 text-[10px] font-mono-paper text-slate-400 pl-1 border-l border-slate-800">
-            <Move size={12} className="text-amber-400" />
+          <div className="hidden xs:flex items-center gap-1 text-[10px] font-mono-paper text-zinc-400 pl-1 border-l border-zinc-900">
+            <Move size={12} className="text-blue-500" />
             <span>Drag to Pan</span>
           </div>
         </div>

@@ -36,7 +36,7 @@ export default function CookieConsent() {
   return (
     <aside
       aria-label="Cookie consent banner"
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50 p-4 rounded-2xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 shadow-2xl backdrop-blur-md text-slate-100 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50 p-4 rounded-2xl bg-[#121215]/95 dark:bg-black/95 border border-zinc-800/80 shadow-2xl backdrop-blur-md text-zinc-100 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 shrink-0 mt-0.5">
@@ -44,8 +44,8 @@ export default function CookieConsent() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <div className="space-y-1 text-xs leading-relaxed text-slate-300">
-          <p className="font-semibold text-slate-100 text-sm">Cookie & Privacy Preferences</p>
+        <div className="space-y-1 text-xs leading-relaxed text-zinc-300">
+          <p className="font-semibold text-zinc-100 text-sm">Cookie & Privacy Preferences</p>
           <p>
             We use essential cookies to maintain your login session and secure your notes. See our{' '}
             <Link href="/privacy" className="underline text-indigo-400 hover:text-indigo-300 transition-colors">
@@ -62,7 +62,7 @@ export default function CookieConsent() {
       <div className="mt-4 flex items-center justify-end gap-2">
         <button
           onClick={acceptEssentialOnly}
-          className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+          className="px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-900 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
         >
           Essential Only
         </button>

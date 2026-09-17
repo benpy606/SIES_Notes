@@ -31,7 +31,7 @@ function SubjectCarousel({
       <div
         role="tablist"
         aria-label="Filter notes by subject"
-        className="bg-white dark:bg-[#121215] text-slate-900 dark:text-white rounded-full p-1.5 shadow-xl border border-slate-200 dark:border-zinc-800 flex items-center gap-1 overflow-x-auto no-scrollbar"
+        className="bg-white dark:bg-[#121215] text-[#121215] dark:text-white rounded-full p-1.5 shadow-xl border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 overflow-x-auto no-scrollbar"
       >
         <button
           role="tab"
@@ -40,7 +40,7 @@ function SubjectCarousel({
           className={`min-h-[42px] px-5 rounded-full text-xs font-black transition-all shrink-0 flex items-center justify-center font-display hover-bounce cursor-pointer ${
             selected === 'All'
               ? 'bg-[#4F46E5] text-white shadow-md shadow-[#4F46E5]/30'
-              : 'bg-transparent text-slate-700 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/10'
+              : 'bg-transparent text-zinc-800 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10'
           }`}
         >
           All
@@ -58,7 +58,7 @@ function SubjectCarousel({
               className={`min-h-[42px] px-5 rounded-full text-xs font-black transition-all shrink-0 flex items-center justify-center font-display hover-bounce cursor-pointer ${
                 isSelected
                   ? 'text-white shadow-md'
-                  : 'bg-transparent text-slate-700 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-white/10'
+                  : 'bg-transparent text-zinc-800 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/10'
               }`}
             >
               {sub.name}

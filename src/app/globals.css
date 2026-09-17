@@ -13,21 +13,21 @@
   --carousel-bg: #000000;
 
   /* Hero Vibe Accent Color Palette (From Reference Image) */
-  --vibe-cobalt: #3B82F6;
+  --vibe-cobalt: #2563EB;
   --vibe-indigo: #4F46E5;
-  --vibe-coral: #FF3B30;
-  --vibe-amber: #F59E0B;
+  --vibe-coral: #2563EB;
+  --vibe-amber: #2563EB;
   --vibe-cyan: #0EA5E9;
   --vibe-pill-track: rgba(255, 255, 255, 0.96);
 
   /* Fallback & Legacy Accent Tokens */
-  --accent-terracotta: #EA580C;
-  --accent-amber: #F59E0B;
+  --accent-terracotta: #2563EB;
+  --accent-amber: #2563EB;
   --accent-emerald: #10B981;
   --accent-indigo: #4F46E5;
   --accent-violet: #8B5CF6;
   --accent-cyan: #0EA5E9;
-  --accent-rose: #FF3B30;
+  --accent-rose: #2563EB;
 
   /* Vibe Gradient Tokens */
   --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #3B82F6 50%, #0EA5E9 100%);
@@ -37,13 +37,13 @@
 
 html.light, body.light, html:not(.dark), body:not(.dark) {
   --background: #F1F5F9;
-  --foreground: #0F172A;
+  --foreground: #000000;
   --card-bg: #FFFFFF;
   --card-border: #CBD5E1;
   --header-bg: rgba(255, 255, 255, 0.95);
   --header-border: #E2E8F0;
   --carousel-bg: #FFFFFF;
-  --vibe-pill-track: rgba(15, 23, 42, 0.06);
+  --vibe-pill-track: rgba(0, 0, 0, 0.06);
 
   --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #2563EB 50%, #0EA5E9 100%);
   --gradient-card-border: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(37, 99, 235, 0.1));
@@ -107,10 +107,10 @@ body {
 .paper-card:hover {
   transform: translateY(-3px);
   box-shadow: 
-    0 20px 35px -8px rgba(15, 23, 42, 0.12), 
-    0 8px 16px -4px rgba(15, 23, 42, 0.06),
-    0 0 0 1px rgba(245, 158, 11, 0.2) inset;
-  border-color: rgba(234, 88, 12, 0.4);
+    0 20px 35px -8px rgba(0, 0, 0, 0.12),
+    0 8px 16px -4px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(37, 99, 235, 0.2) inset;
+  border-color: rgba(37, 99, 235, 0.4);
 }
 
 /* Keyframe Animations */
@@ -164,7 +164,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(245, 158, 11, 0.15) 50%,
+    rgba(37, 99, 235, 0.15) 50%,
     transparent 100%
   );
   animation: shimmer 1.8s infinite cubic-bezier(0.4, 0, 0.6, 1);
@@ -222,13 +222,13 @@ body {
 }
 .dot-indicator.active {
   width: 1.25rem;
-  background-color: var(--accent-amber);
+  background-color: var(--vibe-cobalt);
   border-radius: 9999px;
 }
 
 /* Focus States */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-  outline: 2px solid var(--accent-amber);
+  outline: 2px solid var(--vibe-cobalt);
   outline-offset: 2px;
 }
 

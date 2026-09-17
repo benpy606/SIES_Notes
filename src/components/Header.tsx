@@ -38,20 +38,20 @@ export default function Header({
           <button
             onClick={onOpenSideMenu}
             aria-label="Open navigation menu"
-            className="p-2 min-w-[38px] min-h-[38px] rounded-xl text-slate-700 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/10 transition-colors duration-200 flex items-center justify-center hover-bounce border border-transparent hover:border-slate-200/80 dark:hover:border-zinc-800"
+            className="p-2 min-w-[38px] min-h-[38px] rounded-xl text-zinc-800 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-white/10 transition-colors duration-200 flex items-center justify-center hover-bounce border border-transparent hover:border-zinc-200/80 dark:hover:border-zinc-800"
           >
             <Menu size={22} className="stroke-[2.2]" />
           </button>
         )}
         <div className="flex flex-col justify-center">
-          <h1 className="font-display text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+          <h1 className="font-display text-lg font-black tracking-tight text-[#121215] dark:text-white flex items-center gap-1.5">
             Hello, {firstName}
           </h1>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="w-4 h-4 rounded-md bg-[#F59E0B] text-slate-950 text-[10px] font-black flex items-center justify-center shadow-xs">
+            <span className="w-4 h-4 rounded-md bg-[#F59E0B] text-black text-[10px] font-black flex items-center justify-center shadow-xs">
               ⚡
             </span>
-            <span className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 tracking-wide font-display">
+            <span className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 tracking-wide font-display">
               {profile.is_admin ? 'Admin Member' : 'BSCIT Member'}
             </span>
           </div>
@@ -65,14 +65,14 @@ export default function Header({
             onClick={onRefresh}
             title={isRefreshing ? 'Reloading feed...' : 'Reload feed'}
             aria-label="Reload page feed"
-            className={`p-2 min-w-[36px] min-h-[36px] rounded-xl text-slate-700 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100/80 dark:hover:bg-white/10 transition-colors duration-200 flex items-center justify-center border border-transparent hover:border-slate-200/80 dark:hover:border-zinc-800 ${
-              isRefreshing ? 'text-amber-500 dark:text-[#F59E0B] bg-amber-400/10' : ''
+            className={`p-2 min-w-[36px] min-h-[36px] rounded-xl text-zinc-800 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-white/10 transition-colors duration-200 flex items-center justify-center border border-transparent hover:border-zinc-200/80 dark:hover:border-zinc-800 ${
+              isRefreshing ? 'text-blue-600 dark:text-[#F59E0B] bg-blue-500/10' : ''
             }`}
           >
             <RefreshCw
               size={16}
               className={`stroke-[2.5] transition-transform ${
-                isRefreshing ? 'animate-spin text-amber-500 dark:text-amber-400' : ''
+                isRefreshing ? 'animate-spin text-blue-600 dark:text-blue-500' : ''
               }`}
             />
           </button>
@@ -94,7 +94,7 @@ export default function Header({
         <button
           onClick={onOpenSideMenu}
           aria-label="Profile options"
-          className="w-9 h-9 rounded-full bg-slate-200 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-[#2563EB] dark:hover:bg-[#2563EB] hover:text-white border border-slate-300 dark:border-zinc-800 font-extrabold text-xs flex items-center justify-center transition-colors duration-200 shadow-xs hover-bounce"
+          className="w-9 h-9 rounded-full bg-zinc-200 dark:bg-white/5 text-[#121215] dark:text-white hover:bg-[#2563EB] dark:hover:bg-[#2563EB] hover:text-white border border-zinc-300 dark:border-zinc-800 font-extrabold text-xs flex items-center justify-center transition-colors duration-200 shadow-xs hover-bounce"
         >
           {initials}
         </button>

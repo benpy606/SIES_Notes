@@ -63,13 +63,13 @@ export default function AdminBar({
     <div className="px-5 py-3 bg-[#FCFCFA] border-b border-gray-100">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-gray-400 uppercase tracking-wider">
-          <span className="text-amber-500">⚡</span>
+          <span className="text-blue-600">⚡</span>
           <span>Admin Mode</span>
         </div>
         <button
           onClick={handlePopulate}
           disabled={populating}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-600/30 bg-amber-50 text-[10px] font-bold text-[#B85C38] hover:bg-amber-100/50 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-600/30 bg-blue-950 text-[10px] font-bold text-[#60A5FA] hover:bg-blue-900/50 transition-colors disabled:opacity-50"
         >
           {populating ? (
             <Loader2 size={10} className="animate-spin" />

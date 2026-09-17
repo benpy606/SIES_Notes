@@ -68,13 +68,13 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
       className={`p-2 min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center transition-all hover-bounce border shadow-xs ${
         isDark
           ? 'bg-[#121215] text-[#F59E0B] border-zinc-800 hover:bg-white/10'
-          : 'bg-white text-slate-900 border-slate-300 hover:bg-slate-100'
+          : 'bg-white text-[#121215] border-zinc-300 hover:bg-zinc-100'
       } ${className}`}
     >
       {isDark ? (
         <Sun size={18} className="stroke-[2.5] text-[#F59E0B] animate-pop-in" />
       ) : (
-        <Moon size={18} className="stroke-[2.5] text-slate-900 animate-pop-in" />
+        <Moon size={18} className="stroke-[2.5] text-[#121215] animate-pop-in" />
       )}
     </button>
   )
