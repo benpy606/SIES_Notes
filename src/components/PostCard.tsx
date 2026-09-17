@@ -29,9 +29,9 @@ import dynamic from 'next/dynamic'
 const PdfCanvasPreview = dynamic(() => import('./PdfCanvasPreview'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-slate-950 text-slate-200">
-      <FileText size={28} className="text-amber-400 stroke-[2.2] animate-pulse" />
-      <span className="mt-2 text-[10px] font-mono-paper text-amber-400 uppercase tracking-widest">Loading PDF Preview...</span>
+    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#121215] text-white">
+      <FileText size={28} className="text-[#F59E0B] stroke-[2.2] animate-pulse" />
+      <span className="mt-2 text-[10px] font-mono-paper text-[#F59E0B] uppercase tracking-widest">Loading PDF Preview...</span>
     </div>
   ),
 })
@@ -251,8 +251,8 @@ function PostCardComponent({
   return (
     <article
       style={{ contain: 'content' }}
-      className={`paper-card bg-white dark:bg-[#0D0F18] text-slate-900 dark:text-slate-100 border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-xl rounded-3xl ${
-        isPinned ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-slate-200 dark:border-slate-800/80'
+      className={`paper-card bg-white dark:bg-[#121215] text-slate-900 dark:text-white border overflow-hidden flex flex-col group transition-all animate-slide-up shadow-xl rounded-3xl ${
+        isPinned ? 'border-[#F59E0B]/80 ring-2 ring-[#F59E0B]/30' : 'border-slate-200 dark:border-zinc-800/80'
       }`}
     >
       {/* Pinned Note Banner */}
@@ -286,9 +286,9 @@ function PostCardComponent({
           )}
           <span
             suppressHydrationWarning
-            className="text-[11px] text-slate-500 dark:text-slate-400 font-bold flex items-center gap-1 font-display"
+            className="text-[11px] text-slate-500 dark:text-zinc-400 font-bold flex items-center gap-1 font-display"
           >
-            <Calendar size={12} className="text-blue-500 dark:text-blue-400" />
+            <Calendar size={12} className="text-[#3B82F6]" />
             {formattedDate}
           </span>
         </div>
@@ -313,8 +313,8 @@ function PostCardComponent({
 
               {/* Admin Special Dropdown Menu */}
               {showAdminMenu && (
-                <div className="absolute right-0 top-10 w-52 bg-slate-950 text-slate-100 border border-amber-500/40 rounded-2xl shadow-2xl z-30 overflow-hidden animate-pop-in p-1.5 backdrop-blur-md">
-                  <div className="px-3 py-2 border-b border-slate-800 text-[10px] font-black uppercase tracking-widest text-amber-400 font-mono-paper flex items-center justify-between">
+                <div className="absolute right-0 top-10 w-52 bg-[#121215] text-white border border-[#F59E0B]/40 rounded-2xl shadow-2xl z-30 overflow-hidden animate-pop-in p-1.5 backdrop-blur-md">
+                  <div className="px-3 py-2 border-b border-zinc-800 text-[10px] font-black uppercase tracking-widest text-[#F59E0B] font-mono-paper flex items-center justify-between">
                     <span>Admin Controls</span>
                     <Shield size={12} />
                   </div>
@@ -322,31 +322,31 @@ function PostCardComponent({
                     <button
                       type="button"
                       onClick={handleAdminPinToggle}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-900 rounded-xl transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-white hover:bg-white/5 rounded-xl transition-colors text-left"
                     >
-                      <Pin size={14} className={`stroke-[2] ${isPinned ? 'text-amber-400 fill-amber-400' : 'text-slate-400'}`} />
+                      <Pin size={14} className={`stroke-[2] ${isPinned ? 'text-[#F59E0B] fill-[#F59E0B]' : 'text-zinc-400'}`} />
                       <span>{isPinned ? 'Unpin Note' : 'Pin to Top'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleAdminVerifyToggle}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-900 rounded-xl transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-white hover:bg-white/5 rounded-xl transition-colors text-left"
                     >
-                      <CheckCircle2 size={14} className={`stroke-[2] ${isVerified ? 'text-emerald-400' : 'text-slate-400'}`} />
+                      <CheckCircle2 size={14} className={`stroke-[2] ${isVerified ? 'text-[#10B981]' : 'text-zinc-400'}`} />
                       <span>{isVerified ? 'Remove Verification' : 'Mark as Verified'}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleCopyMeta}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-slate-900 rounded-xl transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-white hover:bg-white/5 rounded-xl transition-colors text-left"
                     >
-                      {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-slate-400" />}
+                      {copied ? <Check size={14} className="text-[#10B981]" /> : <Copy size={14} className="text-zinc-400" />}
                       <span>{copied ? 'Copied Meta!' : 'Copy Note ID'}</span>
                     </button>
 
-                    <div className="border-t border-slate-800/80 my-1" />
+                    <div className="border-t border-zinc-800/80 my-1" />
 
                     <button
                       type="button"
@@ -376,12 +376,12 @@ function PostCardComponent({
                   setShowAdminMenu(false)
                 }}
                 aria-label="Post Options"
-                className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition-colors duration-200"
               >
                 <MoreHorizontal size={18} />
               </button>
               {showMenu && (
-                <div className="absolute right-0 top-9 w-40 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
+                <div className="absolute right-0 top-9 w-40 bg-white dark:bg-[#121215] text-slate-900 dark:text-white border border-slate-200 dark:border-zinc-800 rounded-xl shadow-2xl z-20 overflow-hidden animate-pop-in p-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -410,7 +410,7 @@ function PostCardComponent({
 
       {/* Touch Swipeable Multi-Image Media Carousel */}
       {allImageUrls.length > 0 && (
-        <div className="w-full bg-slate-100 dark:bg-slate-950 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/img">
+        <div className="w-full bg-slate-100 dark:bg-black relative border-t border-b border-slate-200 dark:border-zinc-800 overflow-hidden group/img">
           {/* Top Multi-Page Badge Overlay */}
           <div className="absolute top-3 right-3 z-20 flex items-center gap-2 pointer-events-none">
             <div className="bg-[#0EA5E9] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1 font-mono-paper">
@@ -447,8 +447,8 @@ function PostCardComponent({
                 </div>
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs pointer-events-none">
-                  <span className="text-xs font-extrabold text-white bg-slate-950/80 px-4 py-2 rounded-full shadow-xl border border-white/20">
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs pointer-events-none">
+                  <span className="text-xs font-extrabold text-white bg-black/80 px-4 py-2 rounded-full shadow-xl border border-white/20">
                     Tap to Expand Gallery
                   </span>
                 </div>
@@ -466,7 +466,7 @@ function PostCardComponent({
                   const prevIdx = activeImageIndex > 0 ? activeImageIndex - 1 : allImageUrls.length - 1
                   scrollToPage(prevIdx)
                 }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/75 hover:bg-slate-950 text-white/90 hover:text-amber-400 border border-slate-800 shadow-xl transition-all hover-bounce z-20"
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/75 hover:bg-black text-white/90 hover:text-[#F59E0B] border border-zinc-800 shadow-xl transition-colors duration-200 hover-bounce z-20"
                 aria-label="Previous image"
               >
                 <ChevronLeft size={18} className="stroke-[3]" />
@@ -478,7 +478,7 @@ function PostCardComponent({
                   const nextIdx = activeImageIndex < allImageUrls.length - 1 ? activeImageIndex + 1 : 0
                   scrollToPage(nextIdx)
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/75 hover:bg-slate-950 text-white/90 hover:text-amber-400 border border-slate-800 shadow-xl transition-all hover-bounce z-20"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/75 hover:bg-black text-white/90 hover:text-[#F59E0B] border border-zinc-800 shadow-xl transition-colors duration-200 hover-bounce z-20"
                 aria-label="Next image"
               >
                 <ChevronRight size={18} className="stroke-[3]" />
@@ -496,8 +496,8 @@ function PostCardComponent({
                     }}
                     className={`h-1.5 rounded-full transition-all duration-300 pointer-events-auto ${
                       idx === activeImageIndex
-                        ? 'w-5 bg-amber-400 shadow-md'
-                        : 'w-1.5 bg-slate-400/60 hover:bg-slate-200'
+                        ? 'w-5 bg-[#F59E0B] shadow-md'
+                        : 'w-1.5 bg-white/30 hover:bg-white/60'
                     }`}
                   />
                 ))}
@@ -509,9 +509,9 @@ function PostCardComponent({
 
       {/* PDF Visual Preview */}
       {effectivePdfUrl && (
-        <div className="w-full bg-slate-100 dark:bg-slate-900 relative border-t border-b border-slate-200 dark:border-slate-800 overflow-hidden group/pdf">
+        <div className="w-full bg-slate-100 dark:bg-black relative border-t border-b border-slate-200 dark:border-zinc-800 overflow-hidden group/pdf">
           <div
-            className="w-full aspect-[4/5] relative cursor-pointer overflow-hidden bg-slate-950 flex flex-col items-center justify-start"
+            className="w-full aspect-[4/5] relative cursor-pointer overflow-hidden bg-black flex flex-col items-center justify-start"
             onClick={() => onPdfClick(effectivePdfUrl!, topicTitle)}
           >
             {/* Live Canvas PDF First-Page Document Preview */}
@@ -523,17 +523,17 @@ function PostCardComponent({
             />
 
             {/* Top Right Format Badge */}
-            <div className="absolute top-3 right-3 z-10 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-slate-950/30 font-mono-paper pointer-events-none">
+            <div className="absolute top-3 right-3 z-10 bg-[#F59E0B] text-black text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5 border border-black/30 font-mono-paper pointer-events-none">
               <FileText size={12} className="stroke-[2.5]" />
               <span>PDF Document</span>
             </div>
           </div>
 
           {/* Quick PDF Action Bar */}
-          <div className="px-4 py-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="px-4 py-3 bg-slate-50 dark:bg-[#121215] border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
             <div className="flex items-center gap-2 truncate pr-2">
-              <FileText size={18} className="text-amber-500 dark:text-amber-400 shrink-0 stroke-[2.2]" />
-              <span className="text-xs font-extrabold text-slate-900 dark:text-slate-100 truncate font-display">
+              <FileText size={18} className="text-amber-500 dark:text-[#F59E0B] shrink-0 stroke-[2.2]" />
+              <span className="text-xs font-extrabold text-slate-900 dark:text-white truncate font-display">
                 {topicTitle}.pdf
               </span>
             </div>
@@ -549,7 +549,7 @@ function PostCardComponent({
               <a
                 href={effectivePdfUrl}
                 download={`${topicTitle.replace(/[^a-zA-Z0-9.-]/g, '_')}.pdf`}
-                className="py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700 text-[11px] font-extrabold transition-all flex items-center gap-1.5 shadow-sm hover-bounce"
+                className="py-1.5 px-3 rounded-xl bg-slate-200 dark:bg-white/5 hover:bg-slate-300 dark:hover:bg-white/10 text-slate-900 dark:text-white border border-slate-300 dark:border-zinc-800 text-[11px] font-extrabold transition-colors duration-200 flex items-center gap-1.5 shadow-sm hover-bounce"
                 title="Download PDF"
               >
                 <Download size={12} className="stroke-[2.5]" />
@@ -563,16 +563,16 @@ function PostCardComponent({
       {/* Caption */}
       {post.caption && (
         <div className="px-5 pt-3 pb-3">
-          <p className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed font-medium">
+          <p className="text-xs text-slate-800 dark:text-zinc-400 whitespace-pre-wrap leading-relaxed font-medium">
             {post.caption}
           </p>
         </div>
       )}
 
       {/* Footer */}
-      <div className="px-5 py-3.5 bg-slate-100/90 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between mt-auto transition-colors">
+      <div className="px-5 py-3.5 bg-slate-100/90 dark:bg-[#121215]/90 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between mt-auto transition-colors duration-200">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-amber-500/20 text-slate-800 dark:text-amber-400 font-mono-paper text-[11px] font-black flex items-center justify-center shadow-xs ring-1 ring-amber-500/40">
+          <div className="w-7 h-7 rounded-full bg-[#F59E0B]/20 text-slate-800 dark:text-[#F59E0B] font-mono-paper text-[11px] font-black flex items-center justify-center shadow-xs ring-1 ring-[#F59E0B]/40">
             {authorProfile?.full_name ? authorProfile.full_name.charAt(0) : <User size={12} />}
           </div>
           <span className="text-xs font-bold text-slate-900 dark:text-white font-display">
@@ -582,10 +582,10 @@ function PostCardComponent({
         <button
           onClick={handleUpvote}
           aria-label="Upvote note"
-          className={`min-h-[38px] px-3.5 rounded-full flex items-center gap-1.5 text-xs font-black transition-all hover-bounce ${
+          className={`min-h-[38px] px-3.5 rounded-full flex items-center gap-1.5 text-xs font-black transition-colors duration-200 hover-bounce ${
             hasUpvoted
               ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-300 animate-heart-pulse'
-              : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 shadow-xs'
+              : 'bg-white dark:bg-white/5 border border-slate-300 dark:border-zinc-800 text-slate-800 dark:text-zinc-400 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 shadow-xs'
           }`}
         >
           <Heart size={15} className={hasUpvoted ? 'fill-white text-white' : 'text-slate-400 stroke-[2.2]'} />

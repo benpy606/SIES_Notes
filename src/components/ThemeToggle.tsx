@@ -56,7 +56,7 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
 
   if (!mounted) {
     return (
-      <div className={`w-9.5 h-9.5 rounded-xl bg-slate-900 border border-slate-800 shrink-0 ${className}`} />
+      <div className={`w-9.5 h-9.5 rounded-xl bg-[#121215] border border-zinc-800 shrink-0 ${className}`} />
     )
   }
 
@@ -67,12 +67,12 @@ export default function ThemeToggle({ className = '' }: { className?: string }) 
       aria-label={isDark ? 'Switch to Light mode' : 'Switch to Dark mode'}
       className={`p-2 min-w-[38px] min-h-[38px] rounded-xl flex items-center justify-center transition-all hover-bounce border shadow-xs ${
         isDark
-          ? 'bg-slate-900 text-amber-400 border-slate-800 hover:bg-slate-800'
+          ? 'bg-[#121215] text-[#F59E0B] border-zinc-800 hover:bg-white/10'
           : 'bg-white text-slate-900 border-slate-300 hover:bg-slate-100'
       } ${className}`}
     >
       {isDark ? (
-        <Sun size={18} className="stroke-[2.5] text-amber-400 animate-pop-in" />
+        <Sun size={18} className="stroke-[2.5] text-[#F59E0B] animate-pop-in" />
       ) : (
         <Moon size={18} className="stroke-[2.5] text-slate-900 animate-pop-in" />
       )}

@@ -290,28 +290,28 @@ export default function UploadModal({
       aria-modal="true"
       aria-labelledby="upload-modal-title"
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg bg-slate-950 text-slate-100 rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-slate-800 animate-pop-in"
+        className="w-full max-w-lg bg-[#121215] text-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-zinc-800 animate-pop-in"
       >
         {/* Header */}
-        <div className="flex justify-between items-center pb-3.5 border-b border-slate-800">
+        <div className="flex justify-between items-center pb-3.5 border-b border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-black">
+            <div className="w-8 h-8 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-black">
               <Sparkles size={18} className="stroke-[2.5]" />
             </div>
             <div>
-              <h3 id="upload-modal-title" className="font-display font-black text-lg text-slate-50 leading-none">Upload Class Note</h3>
-              <p className="text-[11px] text-slate-400 font-bold mt-1">Share single or multi-page handwritten notes or PDFs</p>
+              <h3 id="upload-modal-title" className="font-display font-black text-lg text-white leading-none">Upload Class Note</h3>
+              <p className="text-[11px] text-zinc-400 font-bold mt-1">Share single or multi-page handwritten notes or PDFs</p>
             </div>
           </div>
           <button
             ref={closeBtnRef}
             onClick={onClose}
             aria-label="Close upload dialog"
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors border border-slate-800 focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors duration-200 border border-zinc-800 focus-visible:ring-2 focus-visible:ring-amber-400"
           >
             <X size={18} />
           </button>
@@ -332,17 +332,17 @@ export default function UploadModal({
 
           {/* Format Selector */}
           <div>
-            <label className="block text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+            <label className="block text-[10px] font-black text-[#F59E0B] uppercase tracking-widest mb-1.5 font-mono-paper">
               Note Format
             </label>
-            <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-900 rounded-2xl border border-slate-800">
+            <div className="grid grid-cols-2 gap-2 p-1.5 bg-black rounded-2xl border border-zinc-800">
               <button
                 type="button"
                 onClick={() => setFileType('image')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-colors duration-200 ${
                   fileType === 'image'
-                    ? 'bg-amber-400 text-slate-950 shadow-md scale-[1.01]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[#3B82F6] text-white shadow-md scale-[1.01]'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <ImageIcon size={14} className="stroke-[2.5]" />
@@ -351,10 +351,10 @@ export default function UploadModal({
               <button
                 type="button"
                 onClick={() => setFileType('pdf')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all ${
+                className={`py-2.5 px-3 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-colors duration-200 ${
                   fileType === 'pdf'
-                    ? 'bg-amber-400 text-slate-950 shadow-md scale-[1.01]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[#3B82F6] text-white shadow-md scale-[1.01]'
+                    : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <FileText size={14} className="stroke-[2.5]" />
@@ -365,18 +365,18 @@ export default function UploadModal({
 
           {/* Subject Dropdown */}
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+            <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 font-mono-paper">
               Subject *
             </label>
             <select
               value={subjectId}
               onChange={(e) => setSubjectId(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-3 text-xs font-bold text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent shadow-inner"
+              className="w-full rounded-xl border border-zinc-800 bg-black px-3.5 py-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent shadow-inner transition-colors duration-200"
               required
             >
-              <option value="" disabled className="bg-slate-900 text-slate-400">Select a subject...</option>
+              <option value="" disabled className="bg-[#121215] text-zinc-400">Select a subject...</option>
               {safeSubjects.map((s) => (
-                <option key={s.id} value={s.id} className="bg-slate-900 text-slate-100">
+                <option key={s.id} value={s.id} className="bg-[#121215] text-white">
                   {s.name}
                 </option>
               ))}
@@ -385,7 +385,7 @@ export default function UploadModal({
 
           {/* Title / Topic */}
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+            <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 font-mono-paper">
               Topic / Title
             </label>
             <input
@@ -393,20 +393,20 @@ export default function UploadModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Binary Search Trees, Chapter 3"
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2.5 text-xs font-bold text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-inner"
+              className="w-full rounded-xl border border-zinc-800 bg-black px-3.5 py-2.5 text-xs font-bold text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6] shadow-inner transition-colors duration-200"
             />
           </div>
 
           {/* Caption */}
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+            <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 font-mono-paper">
               Description / Remarks
             </label>
             <textarea
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               rows={2}
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3.5 py-2.5 text-xs font-medium text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-inner"
+              className="w-full rounded-xl border border-zinc-800 bg-black px-3.5 py-2.5 text-xs font-medium text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#3B82F6] shadow-inner transition-colors duration-200"
               placeholder="Add key highlights or tips..."
             />
           </div>
@@ -415,11 +415,11 @@ export default function UploadModal({
           {fileType === 'image' && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest font-mono-paper">
+                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest font-mono-paper">
                   Attach Note Photos *
                 </label>
                 {selectedImages.length > 0 && (
-                  <span className="text-[10px] font-bold text-amber-400 font-mono-paper flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-[#F59E0B] font-mono-paper flex items-center gap-1">
                     <Layers size={11} />
                     {selectedImages.length} / {MAX_IMAGES} Pages Selected
                   </span>
@@ -440,28 +440,28 @@ export default function UploadModal({
               {selectedImages.length === 0 ? (
                 <label
                   htmlFor="image-file-input"
-                  className="w-full py-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-amber-400/80 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-200 transition-all hover-bounce group cursor-pointer"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-zinc-800 hover:border-[#3B82F6] bg-black/50 hover:bg-[#121215] flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 hover-bounce group cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-2xl bg-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload size={20} className="stroke-[2.5]" />
                   </div>
-                  <span className="text-xs font-extrabold text-slate-200">Choose Note Images</span>
-                  <span className="text-[10px] text-slate-500 font-medium">Select up to 5 photos per note post</span>
+                  <span className="text-xs font-extrabold text-white">Choose Note Images</span>
+                  <span className="text-[10px] text-zinc-400 font-medium">Select up to 5 photos per note post</span>
                 </label>
               ) : (
                 <div className="space-y-3">
                   {/* Selected Thumbnail Grid */}
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto p-1 bg-slate-900/40 rounded-2xl border border-slate-800/80">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto p-1 bg-black/40 rounded-2xl border border-zinc-800/80">
                     {selectedImages.map((img, idx) => (
-                      <div key={img.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-slate-700 shadow-md group">
+                      <div key={img.id} className="relative aspect-[3/4] rounded-xl overflow-hidden border border-zinc-800 shadow-md group">
                         <Image src={img.preview} alt={`Page ${idx + 1}`} fill unoptimized className="object-cover" />
-                        <div className="absolute top-1 left-1 bg-slate-950/90 text-amber-400 text-[9px] font-black px-1.5 py-0.5 rounded-md border border-slate-800">
+                        <div className="absolute top-1 left-1 bg-black/90 text-[#F59E0B] text-[9px] font-black px-1.5 py-0.5 rounded-md border border-zinc-800">
                           P{idx + 1}
                         </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(img.id)}
-                          className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white rounded-full p-1 shadow-lg border border-slate-900 transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                          className="absolute top-1 right-1 bg-rose-600 hover:bg-rose-500 text-white rounded-full p-1 shadow-lg border border-black transition-transform hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                           title="Remove photo"
                           aria-label={`Remove photo ${idx + 1}`}
                         >
@@ -474,9 +474,9 @@ export default function UploadModal({
                   {selectedImages.length < MAX_IMAGES && (
                     <label
                       htmlFor="image-file-input"
-                      className="w-full py-2.5 rounded-xl border border-dashed border-slate-700 hover:border-amber-400 bg-slate-900 text-slate-300 hover:text-white hover-bounce text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                      className="w-full py-2.5 rounded-xl border border-dashed border-zinc-700 hover:border-[#3B82F6] bg-black text-zinc-400 hover:text-white hover-bounce text-xs font-bold flex items-center justify-center gap-2 transition-colors duration-200 cursor-pointer"
                     >
-                      <Plus size={14} className="text-amber-400 stroke-[3]" />
+                      <Plus size={14} className="text-[#3B82F6] stroke-[3]" />
                       <span>Add More Pages</span>
                     </label>
                   )}
@@ -488,7 +488,7 @@ export default function UploadModal({
           {/* PDF Input */}
           {fileType === 'pdf' && (
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+              <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1.5 font-mono-paper">
                 Attach PDF Document *
               </label>
 
@@ -504,18 +504,18 @@ export default function UploadModal({
               {!pdfFile ? (
                 <label
                   htmlFor="pdf-file-input"
-                  className="w-full py-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-amber-400/80 bg-slate-900/60 hover:bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 hover:text-slate-200 transition-all hover-bounce group cursor-pointer"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-zinc-800 hover:border-[#3B82F6] bg-black/50 hover:bg-[#121215] flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 hover-bounce group cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-amber-400/10 text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 rounded-2xl bg-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileText size={20} className="stroke-[2.5]" />
                   </div>
-                  <span className="text-xs font-extrabold text-slate-200">Choose PDF Document</span>
-                  <span className="text-[10px] text-slate-500 font-medium">Upload handwritten or typed PDF notes</span>
+                  <span className="text-xs font-extrabold text-white">Choose PDF Document</span>
+                  <span className="text-[10px] text-zinc-400 font-medium">Upload handwritten or typed PDF notes</span>
                 </label>
               ) : (
-                <div className="p-4 rounded-2xl bg-slate-900 border border-amber-400/50 text-slate-100 flex items-center justify-between gap-3 shadow-lg animate-pop-in">
+                <div className="p-4 rounded-2xl bg-black border border-zinc-800 text-white flex items-center justify-between gap-3 shadow-lg animate-pop-in">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="w-10 h-10 rounded-2xl bg-[#3B82F6]/20 border border-[#3B82F6]/30 text-[#3B82F6] flex items-center justify-center shrink-0 shadow-xs">
                       <FileText size={20} className="stroke-[2.5]" />
                     </div>
                     <div className="flex flex-col min-w-0">
@@ -523,10 +523,10 @@ export default function UploadModal({
                         {pdfFile.name}
                       </span>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[10px] font-mono-paper font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                        <span className="text-[10px] font-mono-paper font-black text-[#F59E0B] bg-[#F59E0B]/10 px-2 py-0.5 rounded-md border border-[#F59E0B]/20">
                           {formatFileSize(pdfFile.size)}
                         </span>
-                        <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono-paper">
+                        <span className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono-paper">
                           <Check size={11} className="stroke-[3]" /> Ready to Publish
                         </span>
                       </div>
@@ -538,7 +538,7 @@ export default function UploadModal({
                       setPdfFile(null)
                       if (pdfInputRef.current) pdfInputRef.current.value = ''
                     }}
-                    className="p-2 rounded-xl bg-slate-950 hover:bg-rose-950 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/50 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                    className="p-2 rounded-xl bg-white/5 hover:bg-rose-950/50 text-zinc-400 hover:text-rose-300 border border-zinc-800 hover:border-rose-500/50 transition-colors shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
                     title="Remove PDF"
                     aria-label="Remove PDF"
                   >
@@ -552,11 +552,11 @@ export default function UploadModal({
           {saving && (
             <div className="space-y-2 pt-2 animate-fade-in" aria-live="polite">
               <div className="flex justify-between items-center text-[10px] font-mono-paper font-black">
-                <span className="text-amber-400 uppercase tracking-widest">{uploadStatusText}</span>
-                <span className="text-slate-300">{uploadProgress}%</span>
+                <span className="text-[#3B82F6] uppercase tracking-widest">{uploadStatusText}</span>
+                <span className="text-zinc-400">{uploadProgress}%</span>
               </div>
               <div
-                className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner"
+                className="w-full h-2.5 bg-black rounded-full overflow-hidden border border-zinc-800 p-0.5 shadow-inner"
                 role="progressbar"
                 aria-valuenow={uploadProgress}
                 aria-valuemin={0}
@@ -564,7 +564,7 @@ export default function UploadModal({
                 aria-label="Upload progress"
               >
                 <div
-                  className="h-full bg-gradient-to-r from-orange-600 via-amber-400 to-emerald-400 rounded-full transition-all duration-300 progress-animated-striped shadow-md"
+                  className="h-full bg-[#3B82F6] rounded-full transition-all duration-300 progress-animated-striped shadow-md"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -574,7 +574,7 @@ export default function UploadModal({
           <button
             type="submit"
             disabled={saving || isCompressing}
-            className="w-full mt-5 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 py-3.5 text-xs font-black uppercase tracking-wider text-white transition-all disabled:opacity-50 shadow-lg shadow-orange-600/30 hover-bounce"
+            className="w-full mt-5 flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#3B82F6] py-3.5 text-xs font-black uppercase tracking-wider text-white transition-colors duration-200 disabled:opacity-50 shadow-lg hover-bounce"
           >
             {saving ? (
               <span>Publishing Note... ({uploadProgress}%)</span>

@@ -4,13 +4,13 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root, html.dark, body.dark {
-  --background: #05050B;
-  --foreground: #F8FAFC;
-  --card-bg: #0D0F18;
-  --card-border: #1E2338;
-  --header-bg: rgba(5, 5, 11, 0.92);
-  --header-border: #1E2338;
-  --carousel-bg: #05050B;
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card-bg: #121215;
+  --card-border: rgba(255, 255, 255, 0.1);
+  --header-bg: rgba(0, 0, 0, 0.92);
+  --header-border: rgba(255, 255, 255, 0.1);
+  --carousel-bg: #000000;
 
   /* Hero Vibe Accent Color Palette (From Reference Image) */
   --vibe-cobalt: #3B82F6;
