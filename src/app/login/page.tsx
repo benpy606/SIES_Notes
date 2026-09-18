@@ -78,11 +78,11 @@ export default function LoginForm() {
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-7 sm:p-8 shadow-xl relative z-10 animate-pop-in">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center ring-2 ring-slate-800 mb-3 hover-bounce shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center ring-2 ring-slate-800 mb-3 hover-bounce shadow-sm">
             <Sparkles className="w-6 h-6 text-white stroke-[2.5]" />
           </div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            SIES<span className="text-orange-500 font-black">_Notes</span>
+            SIES<span className="text-blue-500 font-black">_Notes</span>
             <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-950 text-amber-400 font-extrabold tracking-wider border border-amber-400/30 uppercase">
               BSCIT
             </span>

@@ -247,7 +247,7 @@ function PostCardComponent({
     >
       {/* Pinned Note Banner */}
       {isPinned && (
-        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 px-4 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 font-mono-paper shadow-xs">
+        <div className="bg-gradient-to-r from-amber-500 to-blue-500 text-slate-950 px-4 py-1 text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 font-mono-paper shadow-xs">
           <Zap size={12} className="fill-slate-950 stroke-none" />
           <span>Pinned Announcement Note</span>
         </div>
@@ -295,7 +295,7 @@ function PostCardComponent({
                   setShowMenu(false)
                 }}
                 aria-label="Admin Special Menu"
-                className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/10 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-500 dark:text-amber-400 text-xs font-black flex items-center gap-1.5 transition-all shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-blue-500/20 to-amber-500/10 hover:from-amber-500/30 hover:to-blue-500/30 border border-amber-500/40 text-amber-500 dark:text-amber-400 text-xs font-black flex items-center gap-1.5 transition-all shadow-xs"
               >
                 <Shield size={14} className="stroke-[2.5]" />
                 <span className="hidden sm:inline uppercase text-[10px] tracking-wider font-mono-paper">Admin Menu</span>

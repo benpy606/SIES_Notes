@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import Header from './Header'
 import SubjectCarousel from './SubjectCarousel'
 import PostList from './PostList'
+import FloatingUpload from './FloatingUpload'
 import SideMenu from './SideMenu'
 import { RefreshCw } from 'lucide-react'
 
@@ -200,6 +201,8 @@ export default function Feed({
           title={pdfModalData?.title}
           onClose={() => setPdfModalData(null)}
         />
+
+        <FloatingUpload onOpen={() => setIsModalOpen(true)} />
       </div>
     </div>
   )
