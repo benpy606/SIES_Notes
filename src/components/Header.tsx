@@ -81,7 +81,7 @@ export default function Header({
         {onOpenUpload && (
           <button
             onClick={onOpenUpload}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#2563EB] hover:bg-[#3B82F6] text-white font-extrabold text-xs shadow-md shadow-[#3B82F6]/20 hover-bounce transition-colors duration-200 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-white text-black font-extrabold text-xs shadow-sm border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-slate-200 transition-colors duration-200 active:scale-95 cursor-pointer"
             aria-label="Upload new note"
           >
             <Plus size={15} className="stroke-[3]" />
@@ -94,7 +94,7 @@ export default function Header({
         <button
           onClick={onOpenSideMenu}
           aria-label="Profile options"
-          className="w-9 h-9 rounded-full bg-slate-200 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-[#2563EB] dark:hover:bg-[#2563EB] hover:text-white border border-slate-300 dark:border-zinc-800 font-extrabold text-xs flex items-center justify-center transition-colors duration-200 shadow-xs hover-bounce"
+          className="w-9 h-9 rounded-full bg-slate-200 dark:bg-white/5 text-slate-900 dark:text-white hover:bg-white dark:hover:bg-white hover:text-black dark:hover:text-black border border-slate-300 dark:border-zinc-800 font-extrabold text-xs flex items-center justify-center transition-colors duration-200 shadow-xs hover-bounce"
         >
           {initials}
         </button>

@@ -92,7 +92,7 @@ export default function Lightbox({
                 e.stopPropagation()
                 setCurrentIndex((prev) => (prev > 0 ? prev - 1 : imageList.length - 1))
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-lg transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
               aria-label="Previous page"
             >
               <ChevronLeft size={24} className="stroke-[2.5]" />
@@ -102,7 +102,7 @@ export default function Lightbox({
                 e.stopPropagation()
                 setCurrentIndex((prev) => (prev < imageList.length - 1 ? prev + 1 : 0))
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-lg transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
               aria-label="Next page"
             >
               <ChevronRight size={24} className="stroke-[2.5]" />

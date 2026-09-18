@@ -7,14 +7,18 @@ export default function CookieConsent() {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    try {
-      const consent = localStorage.getItem('sies_notes_cookie_consent')
-      if (!consent) {
-        setIsVisible(true)
+    const checkConsent = () => {
+      try {
+        const consent = localStorage.getItem('sies_notes_cookie_consent')
+        if (!consent) {
+          setIsVisible(true)
+        }
+      } catch {
+        // localStorage disabled or error
       }
-    } catch {
-      // localStorage disabled or error
     }
+    // Prevent hydration mismatch by checking after mount
+    checkConsent()
   }, [])
 
   const acceptCookies = () => {
@@ -36,7 +40,7 @@ export default function CookieConsent() {
   return (
     <aside
       aria-label="Cookie consent banner"
-      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-50 p-4 rounded-2xl bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/80 shadow-2xl backdrop-blur-md text-slate-100 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
+      className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-md z-[100] p-4 rounded-2xl bg-[#18181b] border border-white/10 shadow-lg backdrop-blur-md text-slate-100 transition-all duration-300 animate-in fade-in slide-in-from-bottom-5"
     >
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 shrink-0 mt-0.5">
@@ -68,7 +72,7 @@ export default function CookieConsent() {
         </button>
         <button
           onClick={acceptCookies}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/30 transition-colors cursor-pointer"
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-black bg-white hover:bg-slate-200 shadow-sm transition-colors cursor-pointer"
         >
           Accept All
         </button>
