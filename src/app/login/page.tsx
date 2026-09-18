@@ -68,26 +68,26 @@ export default function LoginForm() {
   }
 
   return (
-    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 relative ${plusJakartaSans.variable}`}>
+    <div className={`min-h-screen bg-black text-zinc-100 flex flex-col items-center justify-center p-4 relative ${plusJakartaSans.variable}`}>
       {/* Top Right Theme Toggle */}
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
 
       {/* Main Clean Card */}
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-7 sm:p-8 shadow-xl relative z-10 animate-pop-in">
+      <div className="w-full max-w-md bg-[#121215] border border-zinc-900 rounded-3xl p-7 sm:p-8 shadow-xl relative z-10 animate-pop-in">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center ring-2 ring-slate-800 mb-3 hover-bounce shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center ring-2 ring-zinc-900 mb-3 hover-bounce shadow-sm">
             <Sparkles className="w-6 h-6 text-white stroke-[2.5]" />
           </div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-white flex items-center gap-2">
-            SIES<span className="text-orange-500 font-black">_Notes</span>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-950 text-amber-400 font-extrabold tracking-wider border border-amber-400/30 uppercase">
+            SIES<span className="text-blue-500 font-black">_Notes</span>
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-black text-blue-400 font-extrabold tracking-wider border border-blue-400/30 uppercase">
               BSCIT
             </span>
           </h1>
-          <p className="text-xs text-slate-400 font-semibold mt-1.5 max-w-xs">
+          <p className="text-xs text-zinc-400 font-semibold mt-1.5 max-w-xs">
             {isSignUp
               ? 'Join the social notes tracker for SIES Nerul'
               : 'Sign in to access handwritten notes & PDFs'}
@@ -95,13 +95,13 @@ export default function LoginForm() {
 
           {/* Quick Feature Badges */}
           <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
-            <span className="text-[10px] font-black text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80 flex items-center gap-1">
-              <Zap size={10} className="text-amber-400" /> Instant Notes
+            <span className="text-[10px] font-black text-zinc-300 bg-zinc-900/80 px-2.5 py-1 rounded-full border border-zinc-800/80 flex items-center gap-1">
+              <Zap size={10} className="text-blue-400" /> Instant Notes
             </span>
-            <span className="text-[10px] font-black text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80 flex items-center gap-1">
-              <FileText size={10} className="text-orange-400" /> PDF Reader
+            <span className="text-[10px] font-black text-zinc-300 bg-zinc-900/80 px-2.5 py-1 rounded-full border border-zinc-800/80 flex items-center gap-1">
+              <FileText size={10} className="text-blue-400" /> PDF Reader
             </span>
-            <span className="text-[10px] font-black text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80 flex items-center gap-1">
+            <span className="text-[10px] font-black text-zinc-300 bg-zinc-900/80 px-2.5 py-1 rounded-full border border-zinc-800/80 flex items-center gap-1">
               <ShieldCheck size={10} className="text-emerald-400" /> SIES Verified
             </span>
           </div>
@@ -114,7 +114,7 @@ export default function LoginForm() {
         )}
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-950/80 border border-rose-500/50 text-xs font-bold text-rose-300 text-center animate-fade-in">
+          <div className="mb-5 p-3.5 rounded-2xl bg-rose-950/80 border border-indigo-500/50 text-xs font-bold text-rose-300 text-center animate-fade-in">
             {error}
           </div>
         )}
@@ -122,7 +122,7 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4" style={{ touchAction: 'manipulation' }}>
           {isSignUp && (
             <div>
-              <label className="block text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+              <label className="block text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5 font-mono-paper">
                 Full Name
               </label>
               <input
@@ -131,14 +131,14 @@ export default function LoginForm() {
                 autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs font-bold text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all shadow-inner"
+                className="w-full rounded-xl border border-zinc-900 bg-black px-4 py-3 text-xs font-bold text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-inner"
                 placeholder="e.g. Ben Python"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+            <label className="block text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5 font-mono-paper">
               Email Address
             </label>
             <input
@@ -147,14 +147,14 @@ export default function LoginForm() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs font-bold text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all shadow-inner"
+              className="w-full rounded-xl border border-zinc-900 bg-black px-4 py-3 text-xs font-bold text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-inner"
               placeholder="you@sies.edu.in or email"
               required
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1.5 font-mono-paper">
+            <label className="block text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1.5 font-mono-paper">
               Password
             </label>
             <input
@@ -163,7 +163,7 @@ export default function LoginForm() {
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 text-xs font-bold text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all shadow-inner"
+              className="w-full rounded-xl border border-zinc-900 bg-black px-4 py-3 text-xs font-bold text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all shadow-inner"
               placeholder="••••••••"
               required
               minLength={6}
@@ -173,7 +173,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 py-3.5 text-xs font-black uppercase tracking-wider text-white transition-all disabled:opacity-50 shadow-lg shadow-orange-600/30 hover-bounce"
+            className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 py-3.5 text-xs font-black uppercase tracking-wider text-white transition-all disabled:opacity-50 shadow-lg shadow-blue-600/30 hover-bounce"
           >
             {loading ? (
               <span>Please wait...</span>
@@ -192,13 +192,13 @@ export default function LoginForm() {
               setIsSignUp(!isSignUp)
               setError(null)
             }}
-            className="text-xs text-amber-400 font-extrabold hover:text-amber-300 transition-colors"
+            className="text-xs text-blue-400 font-extrabold hover:text-blue-300 transition-colors"
           >
             {isSignUp ? 'Already registered? Sign in here' : "Need an account? Sign up now"}
           </button>
-          <div className="pt-4 border-t border-slate-800/80">
-            <span className="text-[10px] font-mono-paper font-bold text-slate-400">
-              Developed by <span className="text-amber-400 font-black">@benpy606</span> • SIES Nerul
+          <div className="pt-4 border-t border-zinc-900/80">
+            <span className="text-[10px] font-mono-paper font-bold text-zinc-400">
+              Developed by <span className="text-blue-400 font-black">@benpy606</span> • SIES Nerul
             </span>
           </div>
         </div>

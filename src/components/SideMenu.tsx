@@ -77,7 +77,7 @@ function SideMenu({
       />
 
       {/* Drawer Content */}
-      <div className="relative w-84 max-w-[88vw] bg-[#121215] border-r border-zinc-800 text-slate-100 h-full flex flex-col shadow-2xl z-10 animate-slide-up overflow-y-auto no-scrollbar">
+      <div className="relative w-84 max-w-[88vw] bg-[#121215] border-r border-zinc-800 text-zinc-100 h-full flex flex-col shadow-2xl z-10 animate-slide-up overflow-y-auto no-scrollbar">
         {/* Drawer Header */}
         <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-[#121215]/90 backdrop-blur-md sticky top-0 z-10">
           <div className="flex items-center gap-3">

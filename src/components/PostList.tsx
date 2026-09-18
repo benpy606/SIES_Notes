@@ -108,11 +108,11 @@ export default function PostList({
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-32">
       {filteredPosts.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 bg-white/80 dark:bg-[#121215]/80 backdrop-blur-xs border border-dashed border-slate-300 dark:border-zinc-800 rounded-3xl p-6 text-center shadow-xs transition-colors duration-200">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-zinc-400 mb-3">
+        <div className="flex flex-col items-center justify-center py-16 bg-white/80 dark:bg-[#121215]/80 backdrop-blur-xs border border-dashed border-zinc-300 dark:border-zinc-800 rounded-3xl p-6 text-center shadow-xs transition-colors duration-200">
+          <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-white/10 flex items-center justify-center text-zinc-400 mb-3">
             <FileQuestion size={24} />
           </div>
-          <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1 font-display">No notes found</h4>
+          <h4 className="text-sm font-bold text-[#121215] dark:text-white mb-1 font-display">No notes found</h4>
           <p className="text-xs text-stone-500 max-w-xs">
             {selectedSubject !== 'All'
               ? `No notes uploaded for ${selectedSubject} yet.`

@@ -311,7 +311,7 @@ export default function UploadModal({
             ref={closeBtnRef}
             onClick={onClose}
             aria-label="Close upload dialog"
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors duration-200 border border-zinc-800 focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors duration-200 border border-zinc-800 focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <X size={18} />
           </button>

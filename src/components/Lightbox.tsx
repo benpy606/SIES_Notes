@@ -56,18 +56,18 @@ export default function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label="Image lightbox preview"
-      className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center animate-fade-in select-none"
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center animate-fade-in select-none"
       onClick={onClose}
     >
       {/* Top Bar / Close & Page Count */}
       <div className="absolute top-4 inset-x-4 flex items-center justify-between z-50">
-        <div className="bg-slate-900/80 border border-slate-800 text-amber-400 font-mono-paper text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+        <div className="bg-[#121215]/80 border border-zinc-900 text-blue-500 font-mono-paper text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
           {imageList.length > 1 ? `Page ${currentIndex + 1} of ${imageList.length}` : 'Note Photo'}
         </div>
         <button
           ref={closeBtnRef}
           onClick={onClose}
-          className="p-2 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-white transition-colors shadow-lg focus-visible:ring-2 focus-visible:ring-amber-400"
+          className="p-2 rounded-full bg-[#121215]/80 border border-zinc-900 text-zinc-300 hover:text-white transition-colors shadow-lg focus-visible:ring-2 focus-visible:ring-blue-500"
           aria-label="Close image viewer"
         >
           <X size={20} />
@@ -92,7 +92,7 @@ export default function Lightbox({
                 e.stopPropagation()
                 setCurrentIndex((prev) => (prev > 0 ? prev - 1 : imageList.length - 1))
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-[#121215]/80 hover:bg-zinc-900 border border-zinc-800 text-zinc-200 hover:text-blue-500 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Previous page"
             >
               <ChevronLeft size={24} className="stroke-[2.5]" />
@@ -102,7 +102,7 @@ export default function Lightbox({
                 e.stopPropagation()
                 setCurrentIndex((prev) => (prev < imageList.length - 1 ? prev + 1 : 0))
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-amber-400"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-[#121215]/80 hover:bg-zinc-900 border border-zinc-800 text-zinc-200 hover:text-blue-500 shadow-2xl transition-all hover-bounce focus-visible:ring-2 focus-visible:ring-blue-500"
               aria-label="Next page"
             >
               <ChevronRight size={24} className="stroke-[2.5]" />

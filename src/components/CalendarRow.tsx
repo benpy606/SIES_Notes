@@ -77,16 +77,16 @@ export default function CalendarRow({
               className="flex flex-col items-center py-1.5 focus:outline-none group hover-bounce rounded-xl transition-all"
             >
               <span className={`text-[10px] font-bold tracking-wider mb-1 transition-colors ${
-                isSelected ? 'text-[#C85A32]' : 'text-stone-400 group-hover:text-stone-600'
+                isSelected ? 'text-[#2563EB]' : 'text-stone-400 group-hover:text-stone-600'
               }`}>
                 {formatDay(day)}
               </span>
               <div
                 className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold transition-all ${
                   isSelected
-                    ? 'bg-gradient-to-tr from-[#C85A32] to-[#E87A52] text-white shadow-md shadow-orange-900/20 ring-2 ring-orange-400/30'
+                    ? 'bg-gradient-to-tr from-[#2563EB] to-[#60A5FA] text-white shadow-md shadow-blue-900/20 ring-2 ring-blue-400/30'
                     : isToday
-                    ? 'bg-amber-100/80 text-[#C85A32] font-extrabold ring-1 ring-amber-300'
+                    ? 'bg-blue-100/80 text-[#2563EB] font-extrabold ring-1 ring-blue-300'
                     : 'text-stone-800 hover:bg-stone-100/90'
                 }`}
               >
@@ -95,7 +95,7 @@ export default function CalendarRow({
               <div className="h-4 mt-1 flex items-center justify-center">
                 {count > 0 ? (
                   <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-full ${
-                    isSelected ? 'bg-orange-100 text-[#C85A32]' : 'bg-emerald-100 text-emerald-700'
+                    isSelected ? 'bg-blue-100 text-[#2563EB]' : 'bg-emerald-100 text-emerald-700'
                   }`}>
                     {count}
                   </span>
