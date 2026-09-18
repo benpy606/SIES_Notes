@@ -3,6 +3,7 @@
 import { useEffect, useRef, memo } from 'react'
 import { X, LogOut, BookOpen, Upload, FileText, Image as ImageIcon, User, Filter, Sparkles } from 'lucide-react'
 import { signOut } from '@/app/actions'
+import { getVibrantColor } from '@/utils/colors'
 
 type Profile = {
   id: string
@@ -14,15 +15,6 @@ type Subject = {
   id: string
   name: string
   color_code: string
-}
-
-const getVibrantColor = (name: string, defaultColor: string) => {
-  if (name.includes('Computation')) return '#A855F7'
-  if (name.includes('Arch')) return '#10B981'
-  if (name.includes('Networks')) return '#06B6D4'
-  if (name.includes('Imperative')) return '#3B82F6'
-  if (name.includes('Indian')) return '#64748B'
-  return defaultColor
 }
 
 function SideMenu({
@@ -77,11 +69,11 @@ function SideMenu({
       />
 
       {/* Drawer Content */}
-      <div className="relative w-84 max-w-[88vw] bg-[#121215] border-r border-zinc-800 text-slate-100 h-full flex flex-col shadow-2xl z-10 animate-slide-up overflow-y-auto no-scrollbar">
+      <div className="relative w-84 max-w-[88vw] bg-[#18181b] border-r border-zinc-800 text-slate-100 h-full flex flex-col shadow-lg z-10 animate-slide-up overflow-y-auto no-scrollbar">
         {/* Drawer Header */}
-        <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-[#121215]/90 backdrop-blur-md sticky top-0 z-10">
+        <div className="p-5 border-b border-zinc-800 flex items-center justify-between bg-[#18181b]/90 backdrop-blur-md sticky top-0 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#2563EB] text-white flex items-center justify-center font-black text-base shadow-md shadow-[#3B82F6]/20 ring-2 ring-white/20">
+            <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-black text-base shadow-md ring-2 ring-white/10">
               {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : <User size={18} />}
             </div>
             <div className="flex flex-col">
@@ -110,7 +102,7 @@ function SideMenu({
               onClose()
               onOpenUpload()
             }}
-            className="w-full py-3 px-4 min-h-[44px] bg-[#2563EB] hover:bg-[#3B82F6] text-white font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#3B82F6]/20 transition-all hover-bounce uppercase tracking-wider cursor-pointer"
+            className="w-full py-3 px-4 min-h-[44px] bg-white hover:bg-slate-200 text-black font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all hover-bounce uppercase tracking-wider cursor-pointer border border-white/10"
           >
             <Upload size={16} className="stroke-[2.5]" />
             <span>Upload New Note</span>
@@ -122,7 +114,7 @@ function SideMenu({
           <h4 className="text-[11px] font-black text-[#F59E0B] uppercase tracking-widest font-mono-paper mb-2.5 flex items-center gap-1.5">
             <Filter size={12} className="text-[#F59E0B]" /> Format Filter
           </h4>
-          <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#121215] rounded-xl border border-zinc-800">
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-[#09090b] rounded-xl border border-zinc-800">
             <button
               onClick={() => onSelectFileType('all')}
               className={`py-2 px-2 min-h-[38px] rounded-lg text-xs font-black transition-all cursor-pointer ${
@@ -210,7 +202,7 @@ function SideMenu({
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-zinc-800/90 bg-[#121215]/60 flex flex-col gap-3">
+        <div className="p-4 border-t border-zinc-800/90 bg-[#18181b]/60 flex flex-col gap-3">
           <form action={signOut}>
             <button
               type="submit"

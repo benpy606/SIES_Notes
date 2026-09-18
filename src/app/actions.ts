@@ -115,7 +115,7 @@ export async function createPost(formData: FormData) {
       const pdfBuffer = Buffer.from(pdfArrayBuffer)
 
       let bucketName = 'note-pdfs'
-      let uploadResult = await supabase.storage
+      const uploadResult = await supabase.storage
         .from(bucketName)
         .upload(filePath, pdfBuffer, {
           cacheControl: '3600',

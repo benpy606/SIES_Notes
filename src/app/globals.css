@@ -4,13 +4,13 @@
 @variant dark (&:where(.dark, .dark *));
 
 :root, html.dark, body.dark {
-  --background: #000000;
+  --background: #09090b;
   --foreground: #FFFFFF;
-  --card-bg: #121215;
+  --card-bg: #18181b;
   --card-border: rgba(255, 255, 255, 0.1);
-  --header-bg: rgba(0, 0, 0, 0.92);
+  --header-bg: rgba(9, 9, 11, 0.92);
   --header-border: rgba(255, 255, 255, 0.1);
-  --carousel-bg: #000000;
+  --carousel-bg: #09090b;
 
   /* Hero Vibe Accent Color Palette (From Reference Image) */
   --vibe-cobalt: #3B82F6;
@@ -30,9 +30,9 @@
   --accent-rose: #FF3B30;
 
   /* Vibe Gradient Tokens */
-  --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #3B82F6 50%, #0EA5E9 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(79, 70, 229, 0.4), rgba(14, 165, 233, 0.2));
-  --gradient-glow: radial-gradient(circle at top right, rgba(79, 70, 229, 0.25), transparent 75%);
+  --gradient-primary: var(--vibe-cobalt);
+  --gradient-card-border: var(--card-border);
+  --gradient-glow: none;
 }
 
 html.light, body.light, html:not(.dark), body:not(.dark) {
@@ -45,9 +45,9 @@ html.light, body.light, html:not(.dark), body:not(.dark) {
   --carousel-bg: #FFFFFF;
   --vibe-pill-track: rgba(15, 23, 42, 0.06);
 
-  --gradient-primary: linear-gradient(135deg, #4F46E5 0%, #2563EB 50%, #0EA5E9 100%);
-  --gradient-card-border: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(37, 99, 235, 0.1));
-  --gradient-glow: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent 70%);
+  --gradient-primary: #2563EB;
+  --gradient-card-border: var(--card-border);
+  --gradient-glow: none;
 }
 
 html, body {
@@ -98,8 +98,8 @@ body {
   backdrop-filter: blur(12px);
   border: 1.5px solid var(--card-border);
   box-shadow: 
-    0 10px 25px -5px rgba(15, 23, 42, 0.06), 
-    0 4px 10px -2px rgba(15, 23, 42, 0.03);
+    0 4px 6px -1px rgba(15, 23, 42, 0.05),
+    0 2px 4px -1px rgba(15, 23, 42, 0.03);
   border-radius: 20px;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, background-color 0.3s ease;
 }
@@ -107,10 +107,10 @@ body {
 .paper-card:hover {
   transform: translateY(-3px);
   box-shadow: 
-    0 20px 35px -8px rgba(15, 23, 42, 0.12), 
-    0 8px 16px -4px rgba(15, 23, 42, 0.06),
-    0 0 0 1px rgba(245, 158, 11, 0.2) inset;
-  border-color: rgba(234, 88, 12, 0.4);
+    0 10px 15px -3px rgba(15, 23, 42, 0.08),
+    0 4px 6px -2px rgba(15, 23, 42, 0.04),
+    0 0 0 1px rgba(245, 158, 11, 0.1) inset;
+  border-color: rgba(234, 88, 12, 0.3);
 }
 
 /* Keyframe Animations */

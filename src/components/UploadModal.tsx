@@ -62,15 +62,6 @@ export default function UploadModal({
   const supabase = createClient()
 
   useEffect(() => {
-    if (isOpen) {
-      closeBtnRef.current?.focus()
-      setSubjectId('')
-      setTitle('')
-      setCaption('')
-      setSelectedImages([])
-      setPdfFile(null)
-      setError(null)
-    }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose()
@@ -79,6 +70,23 @@ export default function UploadModal({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose])
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      const resetState = () => {
+        setSubjectId('')
+        setTitle('')
+        setCaption('')
+        setSelectedImages([])
+        setPdfFile(null)
+        setError(null)
+      }
+      resetState()
+    } else {
+      setTimeout(() => closeBtnRef.current?.focus(), 50)
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
@@ -294,12 +302,12 @@ export default function UploadModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg bg-[#121215] text-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-zinc-800 animate-pop-in"
+        className="w-full max-w-lg bg-[#18181b] text-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl space-y-5 max-h-[92vh] overflow-y-auto border border-zinc-800 animate-pop-in"
       >
         {/* Header */}
         <div className="flex justify-between items-center pb-3.5 border-b border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#2563EB] text-white flex items-center justify-center font-black">
+            <div className="w-8 h-8 rounded-xl bg-white text-black flex items-center justify-center font-black">
               <Sparkles size={18} className="stroke-[2.5]" />
             </div>
             <div>
@@ -374,9 +382,9 @@ export default function UploadModal({
               className="w-full rounded-xl border border-zinc-800 bg-black px-3.5 py-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent shadow-inner transition-colors duration-200"
               required
             >
-              <option value="" disabled className="bg-[#121215] text-zinc-400">Select a subject...</option>
+              <option value="" disabled className="bg-[#18181b] text-zinc-400">Select a subject...</option>
               {safeSubjects.map((s) => (
-                <option key={s.id} value={s.id} className="bg-[#121215] text-white">
+                <option key={s.id} value={s.id} className="bg-[#18181b] text-white">
                   {s.name}
                 </option>
               ))}
@@ -440,7 +448,7 @@ export default function UploadModal({
               {selectedImages.length === 0 ? (
                 <label
                   htmlFor="image-file-input"
-                  className="w-full py-6 rounded-2xl border-2 border-dashed border-zinc-800 hover:border-[#3B82F6] bg-black/50 hover:bg-[#121215] flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 hover-bounce group cursor-pointer"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-zinc-800 hover:border-zinc-500 bg-black/50 hover:bg-[#18181b] flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 hover-bounce group cursor-pointer"
                 >
                   <div className="w-10 h-10 rounded-2xl bg-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload size={20} className="stroke-[2.5]" />
@@ -504,7 +512,7 @@ export default function UploadModal({
               {!pdfFile ? (
                 <label
                   htmlFor="pdf-file-input"
-                  className="w-full py-6 rounded-2xl border-2 border-dashed border-zinc-800 hover:border-[#3B82F6] bg-black/50 hover:bg-[#121215] flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 hover-bounce group cursor-pointer"
+                  className="w-full py-6 rounded-2xl border-2 border-dashed border-zinc-800 hover:border-zinc-500 bg-black/50 hover:bg-[#18181b] flex flex-col items-center justify-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 hover-bounce group cursor-pointer"
                 >
                   <div className="w-10 h-10 rounded-2xl bg-[#3B82F6]/20 text-[#3B82F6] flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileText size={20} className="stroke-[2.5]" />
@@ -574,7 +582,7 @@ export default function UploadModal({
           <button
             type="submit"
             disabled={saving || isCompressing}
-            className="w-full mt-5 flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] hover:bg-[#3B82F6] py-3.5 text-xs font-black uppercase tracking-wider text-white transition-colors duration-200 disabled:opacity-50 shadow-lg hover-bounce"
+            className="w-full mt-5 flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-200 py-3.5 text-xs font-black uppercase tracking-wider text-black transition-colors duration-200 disabled:opacity-50 shadow-sm hover-bounce border border-white/10"
           >
             {saving ? (
               <span>Publishing Note... ({uploadProgress}%)</span>

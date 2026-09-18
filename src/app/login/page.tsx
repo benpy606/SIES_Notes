@@ -93,18 +93,6 @@ export default function LoginForm() {
               : 'Sign in to access handwritten notes & PDFs'}
           </p>
 
-          {/* Quick Feature Badges */}
-          <div className="flex items-center justify-center gap-2 mt-4 flex-wrap">
-            <span className="text-[10px] font-black text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80 flex items-center gap-1">
-              <Zap size={10} className="text-amber-400" /> Instant Notes
-            </span>
-            <span className="text-[10px] font-black text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80 flex items-center gap-1">
-              <FileText size={10} className="text-orange-400" /> PDF Reader
-            </span>
-            <span className="text-[10px] font-black text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/80 flex items-center gap-1">
-              <ShieldCheck size={10} className="text-emerald-400" /> SIES Verified
-            </span>
-          </div>
         </div>
 
         {successMessage && (
@@ -173,13 +161,13 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-600 via-amber-500 to-rose-600 hover:from-orange-500 hover:to-rose-500 py-3.5 text-xs font-black uppercase tracking-wider text-white transition-all disabled:opacity-50 shadow-lg shadow-orange-600/30 hover-bounce"
+            className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-200 py-3.5 text-xs font-black uppercase tracking-wider text-black transition-all disabled:opacity-50 shadow-sm border border-white/10 hover-bounce"
           >
             {loading ? (
               <span>Please wait...</span>
             ) : (
               <>
-                <span>{isSignUp ? 'Create Student Account' : 'Sign In To Vault'}</span>
+                <span>{isSignUp ? 'Create account' : 'Sign in'}</span>
                 <ArrowRight size={16} className="stroke-[3]" />
               </>
             )}

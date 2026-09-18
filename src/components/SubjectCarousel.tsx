@@ -1,20 +1,12 @@
 'use client'
 
 import { memo } from 'react'
+import { getVibrantColor } from '@/utils/colors'
 
 type Subject = {
   id: string
   name: string
   color_code: string
-}
-
-const getVibrantColor = (name: string, defaultColor: string) => {
-  if (name.includes('Computation')) return '#A855F7'
-  if (name.includes('Arch')) return '#10B981'
-  if (name.includes('Networks')) return '#06B6D4'
-  if (name.includes('Imperative')) return '#3B82F6'
-  if (name.includes('Indian')) return '#64748B'
-  return defaultColor
 }
 
 function SubjectCarousel({
@@ -31,7 +23,7 @@ function SubjectCarousel({
       <div
         role="tablist"
         aria-label="Filter notes by subject"
-        className="bg-white dark:bg-[#121215] text-slate-900 dark:text-white rounded-full p-1.5 shadow-xl border border-slate-200 dark:border-zinc-800 flex items-center gap-1 overflow-x-auto no-scrollbar"
+        className="bg-white dark:bg-[#121215] text-slate-900 dark:text-white rounded-full p-1.5 shadow-md border border-slate-200 dark:border-zinc-800 flex items-center gap-1 overflow-x-auto no-scrollbar"
       >
         <button
           role="tab"
